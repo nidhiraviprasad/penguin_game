@@ -14,6 +14,9 @@
 #include "WindowManager.h"
 #include "Texture.h"
 #include "stb_image.h"
+#include "Components.h" 
+#include "Motion.h" 
+
 #include <chrono>
 
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -89,6 +92,16 @@ public:
 	bool animate = false;
 	bool back_up = false;
 
+	// make an array of all the entity transforms 
+	// TODO use our "game data structure" to populate this, as we need entity objects to populate the array
+	
+	vector<TransformComponent> entityTransforms {
+		{vec3(2.0, 0.5, 2.0), vec3(0.0, 0.0, .5), vec3(0.0, 0.0, 1.0)}
+	};
+
+	// Make instance of movement class, with preset width and height variables
+	// these are the width and height of the grid/plane/ground
+    Motion motion = Motion(10.0, 10.0);
 
 	
 	//keyframes for cat walking animation
@@ -525,6 +538,11 @@ public:
 		prog->bind();
 		glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 		SetView(prog);
+
+		for(int i = 0; i<3 ; i ++){
+			SetModel(prog, entityTransforms[0].position, -0.8+(sTheta/2), 4.1+sTheta, 0.0, 0.01);
+			butterfly[i]->draw(prog);
+		}
 		
 		for (int i = 0; i < 3; i++) {
 			SetModel(prog, vec3(-0.8, butterfly_height[i] + abs(cTheta), 0.9) + butterfly_loc[i], -1.1, 4.1, 0, 0.01); //body
@@ -542,9 +560,10 @@ public:
 			// body up and down     //downwards      //forward and back
 			SetModel(prog, vec3(-0.8, butterfly_height[i] + abs(cTheta), 0.9) + butterfly_loc[i], -0.8+(sTheta/2), 4.1+sTheta, 0, 0.01); //left wing
 			butterfly[1]->draw(prog);
-			// body up and down     //downwards      //forward and back
+			// // body up and down     //downwards      //forward and back
 			SetModel(prog, vec3(-0.8, butterfly_height[i] + abs(cTheta), 0.9) + butterfly_loc[i], -0.8+(sTheta/2), 4.1-sTheta, 0, 0.01); //right wing
-			butterfly[2]->draw(prog);			
+			butterfly[2]->draw(prog);
+						
 
 		}
 
@@ -881,6 +900,9 @@ public:
 		// Pop matrix stacks.
 		Projection->popMatrix();
 
+		// update transforms/positions/time of entities
+		motion.Update(entityTransforms, frametime);
+
 	}
 };
 
@@ -912,6 +934,7 @@ int main(int argc, char *argv[])
 	application->initGeom(resourceDir);
 
 	auto lastTime = chrono::high_resolution_clock::now();
+
 	// Loop until the user closes the window.
 	while (! glfwWindowShouldClose(windowManager->getHandle()))
 	{
@@ -932,6 +955,7 @@ int main(int argc, char *argv[])
 
 		// Render scene.
 		application->render(deltaTime);
+
 		// Swap front and back buffers.
 		glfwSwapBuffers(windowManager->getHandle());
 		// Poll for and process events.
