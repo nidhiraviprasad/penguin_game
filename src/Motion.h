@@ -7,13 +7,14 @@
 class Motion {
 public:
     // Class constructor for movement
-    Motion(float planeWidth, float planeHeight);
+    Motion(float planeX, float planeY, float planeZ);
 
     // Update position based on velocity and forward vector
-    void Update(std::vector<TransformComponent> entities, float deltaTime);
+    void Update(std::vector<TransformComponent>& entities, float deltaTime);
 
-    float m_planeWidth;
-    float m_planeHeight;
+    float m_planeX;
+    float m_planeY;
+    float m_planeZ;
 };
 
 #endif // MOTION_H

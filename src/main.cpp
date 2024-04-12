@@ -95,13 +95,13 @@ public:
 	// make an array of all the entity transforms 
 	// TODO use our "game data structure" to populate this, as we need entity objects to populate the array
 	
-	vector<TransformComponent> entityTransforms {
-		{vec3(2.0, 0.5, 2.0), vec3(0.0, 0.0, .5), vec3(0.0, 0.0, 1.0)}
-	};
+	vector<TransformComponent> entityTransforms = {{vec3(2.0, 0.0, 2.0), vec3(0.0, 0.0, 2.0), vec3(0.0, 0.0, 1.0)}};
+	// TransformComponent butterfly1 = {vec3(2.0, 0.5, 2.0), vec3(0.0, 0.0, 3.0), vec3(0.0, 0.0, 1.0)};
+	// entityTransforms.push_back(butterfly1);
 
 	// Make instance of movement class, with preset width and height variables
 	// these are the width and height of the grid/plane/ground
-    Motion motion = Motion(10.0, 10.0);
+    Motion motion = Motion(10.0, 10.0, 10.0);
 
 	
 	//keyframes for cat walking animation
@@ -540,7 +540,8 @@ public:
 		SetView(prog);
 
 		for(int i = 0; i<3 ; i ++){
-			SetModel(prog, entityTransforms[0].position, -0.8+(sTheta/2), 4.1+sTheta, 0.0, 0.01);
+			vec3 pos_fly = entityTransforms[0].position;
+			SetModel(prog, pos_fly, -0.8+(sTheta/2), 4.1+sTheta, 0.0, 0.01);
 			butterfly[i]->draw(prog);
 		}
 		
