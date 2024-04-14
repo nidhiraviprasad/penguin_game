@@ -14,8 +14,9 @@
 #include "WindowManager.h"
 #include "Texture.h"
 #include "stb_image.h"
-#include "Components.h" 
 #include "Motion.h" 
+#include "Entity.h"
+
 
 #include <chrono>
 
@@ -40,7 +41,7 @@ public:
 	// Our shader program - use this one for Blinn-Phong has diffuse
 
 
-	std::shared_ptr<Program> prog;
+	std::shared_ptr<Program> prog;           // 
 
 	//Our shader program for textures
 	std::shared_ptr<Program> texProg;
@@ -453,7 +454,7 @@ public:
 		glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(M->topMatrix()));
    	}
 
-	void SetView(shared_ptr<Program>  shader) {
+	void SetView(shared_ptr<Program> shader) {
 		float horiz = dist * cos(pitch * 0.01745329);   // for third person camera - calculate horizontal and
 		float vert = dist * sin(pitch * 0.01745329);    // vertical offset based on maintained distance
 		float offX = horiz * sin(angle);				// rotation around cat
@@ -518,26 +519,45 @@ public:
 		Projection->pushMatrix();
 		Projection->perspective(45.0f, aspect, 0.01f, 100.0f);
 
-
-		vec3 butterfly_loc[3];
-		butterfly_loc[0] = vec3(4, -1, 4);
-		butterfly_loc[1] = vec3(-2.3, -1, 3);
-		butterfly_loc[2] = vec3(-2, -1.2, -3);
-
-
-		float butterfly_colors[3][6] {
-			{0.4, 0.2, 0.2, 0.94, 0.23, 0.20},
-			{0.3, 0.3, 0.2, 0.90, 0.73, 0.20},
-			{0.2, 0.3, 0.3, 0.20, 0.73, 0.80}
-		};
-
-		float butterfly_height[3] = {1.1, 1.7, 1.5};
-
+		
 		
 		//material shader first
 		prog->bind();
 		glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 		SetView(prog);
+
+		float butterfly_height[3] = {1.1, 1.7, 1.5};
+
+		
+		vec3 butterfly_loc[3];
+		butterfly_loc[0] = vec3(-2.3, -1, 3);
+		butterfly_loc[1] = vec3(-2, -1.2, -3);
+		butterfly_loc[2] = vec3(4, -1, 4);
+
+
+		Entity bf(butterfly);
+		bf.setMaterials(0, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.25, 0.23, 0.30, 9);
+		bf.setMaterials(1, 0.4, 0.2, 0.2, 0.94, 0.23, 0.20, 0.9, 0.23, 0.20, 0.6);
+		bf.setMaterials(2, 0.4, 0.2, 0.2, 0.94, 0.23, 0.20, 0.9, 0.23, 0.20, 0.6);
+		SetModel(prog, vec3(-0.8, butterfly_height[0] + abs(cTheta), 0.9) + butterfly_loc[0], -1.1, 4.1, 0, 0.01); //body
+		for (int i = 0; i < 3; i++) {
+			glUniform3f(prog->getUniform("MatAmb"), bf.material[i].matAmb.r, bf.material[i].matAmb.g, bf.material[i].matAmb.b);
+			glUniform3f(prog->getUniform("MatDif"), bf.material[i].matDif.r, bf.material[i].matDif.g, bf.material[i].matDif.b);
+			glUniform3f(prog->getUniform("MatSpec"), bf.material[i].matSpec.r, bf.material[i].matSpec.g, bf.material[i].matSpec.b);
+			glUniform1f(prog->getUniform("MatShine"), bf.material[i].matShine);
+			butterfly[i]->draw(prog);
+		}
+		
+
+
+
+		float butterfly_colors[3][6] {
+			{0.3, 0.3, 0.2, 0.90, 0.73, 0.20},
+			{0.2, 0.3, 0.3, 0.20, 0.73, 0.80},
+			{0.4, 0.2, 0.2, 0.94, 0.23, 0.20}
+		};
+
+
 
 		for(int i = 0; i<3 ; i ++){
 			vec3 pos_fly = entityTransforms[0].position;
@@ -545,7 +565,7 @@ public:
 			butterfly[i]->draw(prog);
 		}
 		
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 2; i++) {
 			SetModel(prog, vec3(-0.8, butterfly_height[i] + abs(cTheta), 0.9) + butterfly_loc[i], -1.1, 4.1, 0, 0.01); //body
 			glUniform3f(prog->getUniform("MatAmb"), 0.1, 0.1, 0.1);
 			glUniform3f(prog->getUniform("MatDif"), 0.02, 0.02, 0.02);
