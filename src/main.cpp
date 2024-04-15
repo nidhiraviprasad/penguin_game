@@ -15,7 +15,7 @@
 #include "Texture.h"
 #include "stb_image.h"
 #include "Entity.h"
-
+#include "ShaderManager.h"
 
 #include <chrono>
 
@@ -40,17 +40,21 @@ public:
 	// Our shader program - use this one for Blinn-Phong has diffuse
 
 
-	std::shared_ptr<Program> prog;           // 
+	Shader reg;           // 
 
 	//Our shader program for textures
-	std::shared_ptr<Program> texProg;
+	Shader tex;
 
 	//our geometry
 	shared_ptr<Shape> sphere;
 
 	std::vector<shared_ptr<Shape>> butterfly;
 
-	Entity bf = Entity();
+	Entity bf1 = Entity();
+  Entity bf2 = Entity();
+  Entity bf3 = Entity();
+  
+  std::vector<Entity> bf;
 
 	std::vector<shared_ptr<Shape>> flower;
 
@@ -165,6 +169,7 @@ public:
 		glViewport(0, 0, width, height);
 	}
 
+
 	void init(const std::string& resourceDirectory)
 	{
 		GLSL::checkVersion();
@@ -176,68 +181,13 @@ public:
 
 		g_theta = -PI/2.0;
 
-		// Initialize the GLSL program that we will use for local shading
-		prog = make_shared<Program>();
-		prog->setVerbose(true);
-		prog->setShaderNames(resourceDirectory + "/simple_vert.glsl", resourceDirectory + "/simple_frag.glsl");
-		prog->init();
-		prog->addUniform("P");
-		prog->addUniform("V");
-		prog->addUniform("M");
-		prog->addUniform("MatAmb");
-		prog->addUniform("MatDif");
-		prog->addUniform("MatSpec");
-		prog->addUniform("MatShine");
-		prog->addUniform("lightPos");
-		prog->addAttribute("vertPos");
-		prog->addAttribute("vertNor");
-		prog->addAttribute("vertTex"); //silence error
+		reg = Shader(resourceDirectory + "/simple_vert.glsl", resourceDirectory + "/simple_frag.glsl", false);
+		tex = Shader(resourceDirectory + "/tex_vert.glsl", resourceDirectory + "/tex_frag0.glsl", true);
 
-
-
-		// Initialize the GLSL program that we will use for texture mapping
-		texProg = make_shared<Program>();
-		texProg->setVerbose(true);
-		texProg->setShaderNames(resourceDirectory + "/tex_vert.glsl", resourceDirectory + "/tex_frag0.glsl");
-		texProg->init();
-		texProg->addUniform("P");
-		texProg->addUniform("V");
-		texProg->addUniform("M");
-		texProg->addUniform("flip");
-		texProg->addUniform("Texture0");
-		texProg->addUniform("MatShine");
-		texProg->addUniform("MatSpec");
-		texProg->addUniform("MatAmb");
-		texProg->addUniform("lightPos");
-		texProg->addAttribute("vertPos");
-		texProg->addAttribute("vertNor");
-		texProg->addAttribute("vertTex");
-
-		//read in a load the texture
-		texture0 = make_shared<Texture>();
-  		texture0->setFilename(resourceDirectory + "/grass_tex.jpg");
-  		texture0->init();
-  		texture0->setUnit(0);
-  		texture0->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-
-  		texture1 = make_shared<Texture>();
-  		texture1->setFilename(resourceDirectory + "/sky.jpg");
-  		texture1->init();
-  		texture1->setUnit(1);
-  		texture1->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-
-  		texture2 = make_shared<Texture>();
-  		texture2->setFilename(resourceDirectory + "/cat_tex.jpg");
-  		texture2->init();
-  		texture2->setUnit(2);
-  		texture2->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-
-		texture3 = make_shared<Texture>();
-  		texture3->setFilename(resourceDirectory + "/cat_tex_legs.jpg");
-  		texture3->init();
-  		texture3->setUnit(3);
-  		texture3->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-		
+		tex.addTexture(resourceDirectory + "/grass_tex.jpg");
+		tex.addTexture(resourceDirectory + "/sky.jpg");
+		tex.addTexture(resourceDirectory + "/cat_tex.jpg");
+		tex.addTexture(resourceDirectory + "/cat_tex_legs.jpg");	
     
 	}
 
@@ -333,12 +283,28 @@ public:
 			+ (tree1[0]->max.z - tree1[0]->min.z) * (tree1[0]->max.z - tree1[0]->min.z)
 		);
 
-		// init butterfly
-		bf.initEntity(butterfly);
-		bf.position = vec3(0.5, 0.2, 0.5);
-		bf.m.forward = vec3(1, 0, 0);
-		bf.m.velocity = vec3(2.0, 2.0, 2.0);
-		
+		// init butterfly 1
+		bf1.initEntity(butterfly);
+		bf1.position = vec3(0.5, 0.2, 0.5);
+		bf1.m.forward = vec3(1, 0, 0);
+		bf1.m.velocity = vec3(2.0, 2.0, 2.0);
+    
+    // init butterfly 2
+		bf2.initEntity(butterfly);
+		bf2.position = vec3(1, 0.2, 0.5);
+		bf2.m.forward = vec3(.4, 0, 0);
+		bf2.m.velocity = vec3(0.5, 0.5, 0.5);
+    
+    // init butterfly 3
+		bf3.initEntity(butterfly);
+		bf3.position = vec3(3.0, 0.2, -2.0);
+		bf3.m.forward = vec3(-1, 0, 0);
+		bf3.m.velocity = vec3(3.0, 3.0, 3.0);
+    
+    bf.push_back(bf1);
+    bf.push_back(bf2);
+    bf.push_back(bf3);
+    
 		//code to load in the ground plane (CPU defined data passed to GPU)
 		initGround();
 	}
@@ -399,17 +365,28 @@ public:
 
 
       //code to draw the ground plane
-     void drawGround(shared_ptr<Program> curS) {
-     	curS->bind();
+     void drawGround(Shader s) {
+     	s.prog->bind();
      	glBindVertexArray(GroundVertexArrayID);
-     	texture0->bind(curS->getUniform("Texture0"));
-		
-		glUniform1i(curS->getUniform("flip"), 1);
-		glUniform3f(curS->getUniform("MatAmb"), 0.05, 0.22, 0.05);
-		glUniform3f(curS->getUniform("MatSpec"), 3, 3, 3);
-		glUniform1f(curS->getUniform("MatShine"), 1.0);
+
+
+		materials c;
+		c.matAmb.r = 0.05;
+        c.matAmb.g = 0.22;
+        c.matAmb.b = 0.05;
+        c.matDif.r = 0;
+        c.matDif.g = 0;
+        c.matDif.b = 0;
+        c.matSpec.r = 3;
+        c.matSpec.g = 3;
+        c.matSpec.b = 3;
+        c.matShine = 1.0;
+		s.flip(1);
+		s.setMaterial(c);
+		s.setTexture(0);
+
 		//draw the ground plane 
-  		SetModel(curS, vec3(0, -1, 0), 0, 0, 0, 1);
+  		s.setModel(vec3(0, -1, 0), 0, 0, 0, 1);
   		glEnableVertexAttribArray(0);
   		glBindBuffer(GL_ARRAY_BUFFER, GrndBuffObj);
   		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -429,24 +406,9 @@ public:
   		glDisableVertexAttribArray(0);
   		glDisableVertexAttribArray(1);
   		glDisableVertexAttribArray(2);
-  		curS->unbind();
+  		s.prog->unbind();
      }
 
-
-	/* helper function to set model trasnforms */
-  	void SetModel(shared_ptr<Program> curS, vec3 trans, float rotZ, float rotY, float rotX, float sc) {
-  		mat4 Trans = glm::translate( glm::mat4(1.0f), trans);
-  		mat4 RotX = glm::rotate( glm::mat4(1.0f), rotX, vec3(1, 0, 0));
-  		mat4 RotY = glm::rotate( glm::mat4(1.0f), rotY, vec3(0, 1, 0));
-		mat4 RotZ = glm::rotate( glm::mat4(1.0f), rotZ, vec3(0, 0, 1));
-  		mat4 ScaleS = glm::scale(glm::mat4(1.0f), vec3(sc));
-  		mat4 ctm = Trans*RotX*RotY*RotZ*ScaleS;
-  		glUniformMatrix4fv(curS->getUniform("M"), 1, GL_FALSE, value_ptr(ctm));
-  	}
-
-	void setModel(std::shared_ptr<Program> prog, std::shared_ptr<MatrixStack>M) {
-		glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(M->topMatrix()));
-   	}
 
 	void SetView(shared_ptr<Program> shader) {
 		float horiz = dist * cos(pitch * 0.01745329);   // for third person camera - calculate horizontal and
@@ -516,9 +478,9 @@ public:
 		
 		
 		//material shader first
-		prog->bind();
-		glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-		SetView(prog);
+		reg.prog->bind();
+		glUniformMatrix4fv(reg.prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
+		SetView(reg.prog);
 
 		float butterfly_height[3] = {1.1, 1.7, 1.5};
 
@@ -527,62 +489,37 @@ public:
 		butterfly_loc[0] = vec3(-2.3, -1, 3);
 		butterfly_loc[1] = vec3(-2, -1.2, -3);
 		butterfly_loc[2] = vec3(4, -1, 4);
+ 
+		bf[0].setMaterials(0, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.25, 0.23, 0.30, 9);
+		bf[0].setMaterials(1, 0.4, 0.2, 0.2, 0.94, 0.23, 0.20, 0.9, 0.23, 0.20, 0.6);
+		bf[0].setMaterials(2, 0.4, 0.2, 0.2, 0.94, 0.23, 0.20, 0.9, 0.23, 0.20, 0.6);
 
-		bf.setMaterials(0, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.25, 0.23, 0.30, 9);
-		bf.setMaterials(1, 0.4, 0.2, 0.2, 0.94, 0.23, 0.20, 0.9, 0.23, 0.20, 0.6);
-		bf.setMaterials(2, 0.4, 0.2, 0.2, 0.94, 0.23, 0.20, 0.9, 0.23, 0.20, 0.6);
+		reg.setModel(bf[0].position, -1.1, 4.1, 0, 0.01); //body
 
-		SetModel(prog, vec3(-0.8, butterfly_height[0] + abs(cTheta), 0.9) + butterfly_loc[0], -1.1, 4.1, 0, 0.01); //body
 		for (int i = 0; i < 3; i++) {
-			glUniform3f(prog->getUniform("MatAmb"), bf.material[i].matAmb.r, bf.material[i].matAmb.g, bf.material[i].matAmb.b);
-			glUniform3f(prog->getUniform("MatDif"), bf.material[i].matDif.r, bf.material[i].matDif.g, bf.material[i].matDif.b);
-			glUniform3f(prog->getUniform("MatSpec"), bf.material[i].matSpec.r, bf.material[i].matSpec.g, bf.material[i].matSpec.b);
-			glUniform1f(prog->getUniform("MatShine"), bf.material[i].matShine);
-			butterfly[i]->draw(prog);
+			reg.setMaterial(bf[0].material[i]);
+			bf[0].objs[i]->draw(reg.prog);
 		}
 
-		float butterfly_colors[3][6] {
-			{0.3, 0.3, 0.2, 0.90, 0.73, 0.20},
-			{0.2, 0.3, 0.3, 0.20, 0.73, 0.80},
-			{0.4, 0.2, 0.2, 0.94, 0.23, 0.20}
-		};
+		bf[1].setMaterials(0, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.25, 0.23, 0.30, 9);
+		bf[1].setMaterials(1, 0.2, 0.3, 0.3, 0.20, 0.73, 0.80, 0.9, 0.23, 0.20, 0.6);
+		bf[1].setMaterials(2, 0.2, 0.3, 0.3, 0.20, 0.73, 0.80, 0.9, 0.23, 0.20, 0.6);
 
-	
-		SetModel(prog, bf.position, -1.1, 4.1, 0, 0.01);
-		butterfly[0]->draw(prog);
-
-		// body up and down     //downwards      //forward and back
-		SetModel(prog, bf.position, -0.8+(sTheta/2), 4.1+sTheta, 0, 0.01); //left wing
-		butterfly[1]->draw(prog);
-		
-		// body up and down     //downwards      //forward and back
-		SetModel(prog, bf.position, -0.8+(sTheta/2), 4.1-sTheta, 0, 0.01); //right wing
-		butterfly[2]->draw(prog);
-
-		
-		for (int i = 0; i < 2; i++) {
-			SetModel(prog, vec3(-0.8, butterfly_height[i] + abs(cTheta), 0.9) + butterfly_loc[i], -1.1, 4.1, 0, 0.01); //body
-			glUniform3f(prog->getUniform("MatAmb"), 0.1, 0.1, 0.1);
-			glUniform3f(prog->getUniform("MatDif"), 0.02, 0.02, 0.02);
-			glUniform3f(prog->getUniform("MatSpec"), 0.25, 0.23, 0.30);
-			glUniform1f(prog->getUniform("MatShine"), 9);
-			butterfly[0]->draw(prog);
-
-			glUniform3f(prog->getUniform("MatAmb"), butterfly_colors[i][0], butterfly_colors[i][1], butterfly_colors[i][2]);
-			glUniform3f(prog->getUniform("MatDif"), butterfly_colors[i][3], butterfly_colors[i][4], butterfly_colors[i][5]);
-			glUniform3f(prog->getUniform("MatSpec"), 0.9, 0.23, 0.20);
-			glUniform1f(prog->getUniform("MatShine"), 0.6);
-											
-			// body up and down     //downwards      //forward and back
-			SetModel(prog, vec3(-0.8, butterfly_height[i] + abs(cTheta), 0.9) + butterfly_loc[i], -0.8+(sTheta/2), 4.1+sTheta, 0, 0.01); //left wing
-			butterfly[1]->draw(prog);
-			// // body up and down     //downwards      //forward and back
-			SetModel(prog, vec3(-0.8, butterfly_height[i] + abs(cTheta), 0.9) + butterfly_loc[i], -0.8+(sTheta/2), 4.1-sTheta, 0, 0.01); //right wing
-			butterfly[2]->draw(prog);
-						
+		reg.setModel(bf[1].position, -1.1, 4.1, 0, 0.01); //body
+		for (int i = 0; i < 3; i++) {
+			reg.setMaterial(bf[1].material[i]);
+			bf[1].objs[i]->draw(reg.prog);
 		}
+    
+    bf[2].setMaterials(0, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.25, 0.23, 0.30, 9);
+		bf[2].setMaterials(1, 0.3, 0.3, 0.2, 0.90, 0.73, 0.20, 0.9, 0.23, 0.20, 0.6);
+		bf[2].setMaterials(2, 0.3, 0.3, 0.2, 0.90, 0.73, 0.20, 0.9, 0.23, 0.20, 0.6);
 
-
+		reg.setModel(vec3(-0.8, butterfly_height[2] + abs(cTheta), 0.9) + butterfly_loc[2], -1.1, 4.1, 0, 0.01); //body
+		for (int i = 0; i < 3; i++) {
+			reg.setMaterial(bf[2].material[i]);
+			bf[2].objs[i]->draw(reg.prog);
+		}
 
 		//where each flower will go
 		vec3 flower_loc[7];
@@ -595,28 +532,28 @@ public:
 		flower_loc[6] = vec3(3, -1, -2);
 
 
-		// populate them all!!
-		SetModel(prog, vec3(4, -1, 4), cTheta*cTheta, 0, 0, 2.5);
+
+		std::vector<Entity> flowers;
 		for (int i = 0; i < 7; i++) {
-			SetModel(prog, flower_loc[i], cTheta*cTheta+0.03, 0, 0, 2.5); 
-			glUniform3f(prog->getUniform("MatAmb"), 0.2, 0.1, 0.1);          //pink petals
-			glUniform3f(prog->getUniform("MatDif"), 0.94, 0.42, 0.64);
-			glUniform3f(prog->getUniform("MatSpec"), 0.7, 0.23, 0.60);
-			glUniform1f(prog->getUniform("MatShine"), 100);
-			flower[0]->draw(prog); 
-			glUniform3f(prog->getUniform("MatAmb"), 0.1, 0.1, 0.1);          //yellow center
-			glUniform3f(prog->getUniform("MatDif"), 0.94, 0.72, 0.22);
-			glUniform3f(prog->getUniform("MatSpec"), 0.23, 0.23, 0.20);
-			glUniform1f(prog->getUniform("MatShine"), 100);
-			flower[1]->draw(prog);
-			glUniform3f(prog->getUniform("MatAmb"), 0.05, 0.15, 0.05);       //green stem & leaves
-			glUniform3f(prog->getUniform("MatDif"), 0.24, 0.92, 0.41);
-			glUniform3f(prog->getUniform("MatSpec"), 1, 1, 1);
-			glUniform1f(prog->getUniform("MatShine"), 0);
-			flower[2]->draw(prog);
+			Entity e = Entity();
+      e.initEntity(flower);
+			e.setMaterials(0, 0.2, 0.1, 0.1, 0.94, 0.42, 0.64, 0.7, 0.23, 0.60, 100);
+			e.setMaterials(1, 0.1, 0.1, 0.1, 0.94, 0.72, 0.22, 0.23, 0.23, 0.20, 100);
+			e.setMaterials(2, 0.05, 0.15, 0.05, 0.24, 0.92, 0.41, 1, 1, 1, 0);
+			flowers.push_back(e);
 		}
 
-		// tree locations
+		//reg.setModel(vec3(4, -1, 4), cTheta*cTheta, 0, 0, 2.5);
+		for (int i = 0; i < 7; i++) {
+					
+			reg.setModel(flower_loc[i], cTheta*cTheta+0.03, 0, 0, 2.5); 
+			for (int j = 0; j < 3; j++) {
+				reg.setMaterial(flowers[i].material[j]);
+				flowers[i].objs[j]->draw(reg.prog);
+			}
+		}
+
+
 		vec3 tree_loc[7];
 		tree_loc[0] = vec3(4, -5.5, 7);
 		tree_loc[1] = vec3(-2.9,-5.5, -7);
@@ -626,45 +563,52 @@ public:
 		tree_loc[5] = vec3(-5, -5.5, 9);
 		tree_loc[6] = vec3(-6, -5.5, 2);
 
+		std::vector<Entity> trees;
+		for (int i = 0; i < 7; i++) {
+			Entity e = Entity();
+      e.initEntity(tree1);
+			e.setMaterials(0, 0, 0, 0, 0.897093, 0.588047, 0.331905, 0.5, 0.5, 0.5, 200);
+			for (int j = 1; j < 12; j++) {
+				e.setMaterials(j, 0.1, 0.2, 0.1, 0.285989, 0.567238, 0.019148, 0.5, 0.5, 0.5, 200);
+			}
+			trees.push_back(e);
+		}
 
-		//populate them!!
-		for (int j = 0; j < 7; j++) {
-			SetModel(prog, tree_loc[j] + vec3(0, 4.1, 0), 0, 0, 0, 0.15);
-			for (int i = 0; i < 12; i++) {
-				if (i == 0) {
-					glUniform3f(prog->getUniform("MatAmb"), 0, 0, 0);       //trunk
-					glUniform3f(prog->getUniform("MatDif"), 0.897093, 0.588047, 0.331905);
-					glUniform3f(prog->getUniform("MatSpec"), 0.5, 0.5, 0.5);
-					glUniform1f(prog->getUniform("MatShine"), 200);
-				}
-				else {
-					glUniform3f(prog->getUniform("MatAmb"), 0.1, 0.2, 0.1);       //leaves
-					glUniform3f(prog->getUniform("MatDif"), 0.285989, 0.567238, 0.019148);
-					glUniform3f(prog->getUniform("MatSpec"), 0.5, 0.5, 0.5);
-					glUniform1f(prog->getUniform("MatShine"), 200);
-					
-				}
-				tree1[i]->draw(prog);
+		for (int i = 0; i < 7; i++) {
+			reg.setModel(tree_loc[i] + vec3(0, 4.1, 0), 0, 0, 0, 0.15); 
+			for (int j = 0; j < 12; j++) {
+				reg.setMaterial(trees[i].material[j]);
+				trees[i].objs[j]->draw(reg.prog);
 			}
 		}
 
-		prog->unbind();
+
+
+		reg.prog->unbind();
 
 
 
 		//using texture shader now
-		texProg->bind();
-		glUniformMatrix4fv(texProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
+		tex.prog->bind();
+		glUniformMatrix4fv(tex.prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 
-		SetView(texProg);
+		SetView(tex.prog);
 
 
-
-		glUniform1i(texProg->getUniform("flip"), 1);
-		glUniform3f(texProg->getUniform("MatAmb"), 0.17, 0.05, 0.05);
-		glUniform3f(texProg->getUniform("MatSpec"), 0.2, 0.1, 0.1);
-		glUniform1f(texProg->getUniform("MatShine"), 5);
-		texture3->bind(texProg->getUniform("Texture0"));
+		materials c;
+		c.matAmb.r = 0.17;
+        c.matAmb.g = 0.05;
+        c.matAmb.b = 0.05;
+        c.matDif.r = 0;
+        c.matDif.g = 0;
+        c.matDif.b = 0;
+        c.matSpec.r = 0.2;
+        c.matSpec.g = 0.1;
+        c.matSpec.b = 0.1;
+        c.matShine = 5;
+		tex.flip(1);
+		tex.setMaterial(c);
+		tex.setTexture(3);
 
 
 
@@ -692,18 +636,18 @@ public:
 						Model->translate(vec3(0, 0, 0.09));
 
 						Model->scale(vec3(0.08, 0.045, 0.1));
-						setModel(texProg, Model);
-						sphere->draw(texProg);
+						tex.setModel(Model);
+						sphere->draw(tex.prog);
 					Model->popMatrix();
 
 					Model->scale(vec3(0.08, 0.18, 0.084));
-					setModel(texProg, Model);
-					sphere->draw(texProg);
+					tex.setModel(Model);
+					sphere->draw(tex.prog);
 				Model->popMatrix();
 
 				Model->scale(vec3(0.11, 0.29, 0.12));
-				setModel(texProg, Model);
-				sphere->draw(texProg);
+				tex.setModel(Model);
+				sphere->draw(tex.prog);
 			Model->popMatrix();
 
 
@@ -725,18 +669,18 @@ public:
 						Model->translate(vec3(0, 0, 0.09));
 
 						Model->scale(vec3(0.08, 0.045, 0.1));
-						setModel(texProg, Model);
-						sphere->draw(texProg);
+						tex.setModel(Model);
+						sphere->draw(tex.prog);
 					Model->popMatrix();
 
 					Model->scale(vec3(0.08, 0.18, 0.084));
-					setModel(texProg, Model);
-					sphere->draw(texProg);
+					tex.setModel(Model);
+					sphere->draw(tex.prog);
 				Model->popMatrix();
 
 				Model->scale(vec3(0.11, 0.29, 0.12));
-				setModel(texProg, Model);
-				sphere->draw(texProg);
+				tex.setModel(Model);
+				sphere->draw(tex.prog);
 			Model->popMatrix();
 
 
@@ -758,18 +702,18 @@ public:
 						Model->translate(vec3(0, 0, 0.045));
 
 						Model->scale(vec3(0.08, 0.05, 0.11));
-						setModel(texProg, Model);
-						sphere->draw(texProg);
+						tex.setModel(Model);
+						sphere->draw(tex.prog);
 					Model->popMatrix();
 
 					Model->scale(vec3(0.082, 0.17, 0.082));
-					setModel(texProg, Model);
-					sphere->draw(texProg);
+					tex.setModel(Model);
+					sphere->draw(tex.prog);
 				Model->popMatrix();
 
 				Model->scale(vec3(0.12, 0.3, 0.12));
-				setModel(texProg, Model);
-				sphere->draw(texProg);
+				tex.setModel(Model);
+				sphere->draw(tex.prog);
 			Model->popMatrix();
 
 
@@ -792,20 +736,20 @@ public:
 						Model->translate(vec3(0, 0, 0.045));
 
 						Model->scale(vec3(0.08, 0.05, 0.11));
-						setModel(texProg, Model);
-						sphere->draw(texProg);
+						tex.setModel(Model);
+						sphere->draw(tex.prog);
 					Model->popMatrix();
 
 					Model->scale(vec3(0.082, 0.17, 0.082));
-					setModel(texProg, Model);
-					sphere->draw(texProg);
+					tex.setModel(Model);
+					sphere->draw(tex.prog);
 				Model->popMatrix();
 
 
 
 				Model->scale(vec3(0.12, 0.3, 0.12));
-				setModel(texProg, Model);
-				sphere->draw(texProg);
+				tex.setModel(Model);
+				sphere->draw(tex.prog);
 			Model->popMatrix();
 
 
@@ -830,64 +774,72 @@ public:
 							Model->translate(vec3(0, -0.13, 0));
 
 							Model->scale(vec3(0.09, 0.16, 0.09));
-							setModel(texProg, Model);
-							sphere->draw(texProg);
+							tex.setModel(Model);
+							sphere->draw(tex.prog);
 						Model->popMatrix();
 
 
 						Model->scale(vec3(0.1, 0.16, 0.1));
-						setModel(texProg, Model);
-						sphere->draw(texProg);
+						tex.setModel(Model);
+						sphere->draw(tex.prog);
 					Model->popMatrix();
 
 					Model->scale(vec3(0.11, 0.22, 0.11));
-					setModel(texProg, Model);
-					sphere->draw(texProg);
+					tex.setModel(Model);
+					sphere->draw(tex.prog);
 				Model->popMatrix();
 
 				Model->scale(vec3(0.12, 0.2, 0.12));
-				setModel(texProg, Model);
-				sphere->draw(texProg);
+				tex.setModel(Model);
+				sphere->draw(tex.prog);
 			Model->popMatrix();
 
-			texture3->unbind();
-			texture2->bind(texProg->getUniform("Texture0"));
+			tex.unbindTexture(3);
+			tex.setTexture(2);
 
-
-			
-			glUniform3f(texProg->getUniform("MatAmb"), 0.1, 0.05, 0.05);
 			Model->scale(vec3(0.4, 0.4, 0.4));
-			setModel(texProg, Model);
-			cat->draw(texProg); // body !
+			tex.setModel(Model);
+			cat->draw(tex.prog); // body !
 
 
 		Model->popMatrix();
 
-		texture2->unbind();
+		tex.unbindTexture(2);
 
 
 		//sky box!
-		glUniform1i(texProg->getUniform("flip"), 0);
-		
-		glUniform3f(texProg->getUniform("MatAmb"), 0.2, 0.3, 0.65);
-		
-		glUniform1f(texProg->getUniform("MatShine"), 100.0);
-		texture1->bind(texProg->getUniform("Texture0"));
+
+
+		materials sky_box;
+		sky_box.matAmb.r = 0.2;
+        sky_box.matAmb.g = 0.3;
+        sky_box.matAmb.b = 0.65;
+        sky_box.matDif.r = 0;
+        sky_box.matDif.g = 0;
+        sky_box.matDif.b = 0;
+        sky_box.matSpec.r = 0;
+        sky_box.matSpec.g = 0;
+        sky_box.matSpec.b = 0;
+        sky_box.matShine = 100.0;
+		tex.flip(0);
+		tex.setMaterial(sky_box);
+		tex.setTexture(1);
+
 		Model->pushMatrix();
 			Model->loadIdentity();
 			Model->scale(vec3(20.0));
-			setModel(texProg, Model);
-			sphere->draw(texProg);
+			tex.setModel(Model);
+			sphere->draw(tex.prog);
 		Model->popMatrix();
 
-		texProg->unbind();
+		tex.unbindTexture(1);
 
 
-		drawGround(texProg);  //draw ground here
+		drawGround(tex);  //draw ground here
 
 
 		//halt animations if cat collides with flower or tree
-		check_collision(flower_loc, 7, tree_loc, 7, player_pos);
+	//	check_collision(flower_loc, 7, tree_loc, 7, player_pos);
 		
 
 		//update animation variables
@@ -916,6 +868,9 @@ public:
 
 	}
 };
+
+
+
 
 int main(int argc, char *argv[])
 {

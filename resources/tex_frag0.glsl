@@ -4,6 +4,7 @@ uniform sampler2D Texture0;
 uniform float MatShine;
 uniform vec3 MatAmb;
 uniform vec3 MatSpec;
+uniform vec3 MatDif;
 
 uniform int flip;
 

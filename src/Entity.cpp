@@ -38,6 +38,7 @@ void Entity::setMaterials(int i, float r1, float g1, float b1, float r2, float g
         material[i].matShine = s;
 }
 
+
 // TODO use our "game data structure" to manage all entity updates
 
 // velocity upon collision (bounds of world, or obstacle) and will rotate the model/"flip" the forward vector
@@ -52,4 +53,5 @@ void Entity::updateMotion(float deltaTime) {
         
         // TODO add collision component
 }
+
 
