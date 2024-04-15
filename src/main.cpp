@@ -63,6 +63,8 @@ public:
 	shared_ptr<Shape> cat;
 	
 
+	int nextID = 0;
+
 	//global data for ground plane - direct load constant defined CPU data to GPU (not obj)
 	GLuint GrndBuffObj, GrndNorBuffObj, GrndTexBuffObj, GIndxBuffObj;
 	int g_GiboLen;
