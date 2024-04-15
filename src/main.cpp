@@ -14,9 +14,8 @@
 #include "WindowManager.h"
 #include "Texture.h"
 #include "stb_image.h"
-#include "Motion.h" 
+#include "Entity.h"
 #include "ShaderManager.h"
-
 
 #include <chrono>
 
@@ -50,11 +49,19 @@ public:
 	shared_ptr<Shape> sphere;
 
 	std::vector<shared_ptr<Shape>> butterfly;
+
+	Entity bf1 = Entity();
+  Entity bf2 = Entity();
+  Entity bf3 = Entity();
+  
+  std::vector<Entity> bf;
+
 	std::vector<shared_ptr<Shape>> flower;
 
 	std::vector<shared_ptr<Shape>> tree1;
 	
 	shared_ptr<Shape> cat;
+	
 
 	//global data for ground plane - direct load constant defined CPU data to GPU (not obj)
 	GLuint GrndBuffObj, GrndNorBuffObj, GrndTexBuffObj, GIndxBuffObj;
@@ -92,18 +99,6 @@ public:
 	//rules for cat walking around
 	bool animate = false;
 	bool back_up = false;
-
-	// make an array of all the entity transforms 
-	// TODO use our "game data structure" to populate this, as we need entity objects to populate the array
-	
-	vector<TransformComponent> entityTransforms = {{vec3(2.0, 0.0, 2.0), vec3(0.0, 0.0, 2.0), vec3(0.0, 0.0, 1.0)}};
-	// TransformComponent butterfly1 = {vec3(2.0, 0.5, 2.0), vec3(0.0, 0.0, 3.0), vec3(0.0, 0.0, 1.0)};
-	// entityTransforms.push_back(butterfly1);
-
-	// Make instance of movement class, with preset width and height variables
-	// these are the width and height of the grid/plane/ground
-    Motion motion = Motion(10.0, 10.0, 10.0);
-
 	
 	//keyframes for cat walking animation
 	double f[5][12] = {
@@ -124,8 +119,6 @@ public:
 	//interpolation of keyframes for animation
 	int cur_idx = 0, next_idx = 1;
 	float frame = 0.0;
-
-
 
 	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 	{
@@ -290,10 +283,31 @@ public:
 			+ (tree1[0]->max.z - tree1[0]->min.z) * (tree1[0]->max.z - tree1[0]->min.z)
 		);
 
+		// init butterfly 1
+		bf1.initEntity(butterfly);
+		bf1.position = vec3(0.5, 0.2, 0.5);
+		bf1.m.forward = vec3(1, 0, 0);
+		bf1.m.velocity = vec3(2.0, 2.0, 2.0);
+    
+    // init butterfly 2
+		bf2.initEntity(butterfly);
+		bf2.position = vec3(1, 0.2, 0.5);
+		bf2.m.forward = vec3(.4, 0, 0);
+		bf2.m.velocity = vec3(0.5, 0.5, 0.5);
+    
+    // init butterfly 3
+		bf3.initEntity(butterfly);
+		bf3.position = vec3(3.0, 0.2, -2.0);
+		bf3.m.forward = vec3(-1, 0, 0);
+		bf3.m.velocity = vec3(3.0, 3.0, 3.0);
+    
+    bf.push_back(bf1);
+    bf.push_back(bf2);
+    bf.push_back(bf3);
+    
 		//code to load in the ground plane (CPU defined data passed to GPU)
 		initGround();
 	}
-
 
 	//directly pass quad for the ground to the GPU
 	void initGround() {
@@ -476,36 +490,28 @@ public:
 		butterfly_loc[1] = vec3(-2, -1.2, -3);
 		butterfly_loc[2] = vec3(4, -1, 4);
  
-
-		std::vector<Entity> bf;
-		for (int i = 0; i < 3; i++) {
-			Entity e = Entity(butterfly);
-			bf.push_back(e);
-		}
-
 		bf[0].setMaterials(0, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.25, 0.23, 0.30, 9);
 		bf[0].setMaterials(1, 0.4, 0.2, 0.2, 0.94, 0.23, 0.20, 0.9, 0.23, 0.20, 0.6);
 		bf[0].setMaterials(2, 0.4, 0.2, 0.2, 0.94, 0.23, 0.20, 0.9, 0.23, 0.20, 0.6);
 
-		reg.setModel(vec3(-0.8, butterfly_height[0] + abs(cTheta), 0.9) + butterfly_loc[0], -1.1, 4.1, 0, 0.01); //body
+		reg.setModel(bf[0].position, -1.1, 4.1, 0, 0.01); //body
+
 		for (int i = 0; i < 3; i++) {
 			reg.setMaterial(bf[0].material[i]);
 			bf[0].objs[i]->draw(reg.prog);
 		}
-		
 
 		bf[1].setMaterials(0, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.25, 0.23, 0.30, 9);
 		bf[1].setMaterials(1, 0.2, 0.3, 0.3, 0.20, 0.73, 0.80, 0.9, 0.23, 0.20, 0.6);
 		bf[1].setMaterials(2, 0.2, 0.3, 0.3, 0.20, 0.73, 0.80, 0.9, 0.23, 0.20, 0.6);
 
-		reg.setModel(vec3(-0.8, butterfly_height[1] + abs(cTheta), 0.9) + butterfly_loc[1], -1.1, 4.1, 0, 0.01); //body
+		reg.setModel(bf[1].position, -1.1, 4.1, 0, 0.01); //body
 		for (int i = 0; i < 3; i++) {
 			reg.setMaterial(bf[1].material[i]);
 			bf[1].objs[i]->draw(reg.prog);
 		}
-
-
-		bf[2].setMaterials(0, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.25, 0.23, 0.30, 9);
+    
+    bf[2].setMaterials(0, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.25, 0.23, 0.30, 9);
 		bf[2].setMaterials(1, 0.3, 0.3, 0.2, 0.90, 0.73, 0.20, 0.9, 0.23, 0.20, 0.6);
 		bf[2].setMaterials(2, 0.3, 0.3, 0.2, 0.90, 0.73, 0.20, 0.9, 0.23, 0.20, 0.6);
 
@@ -514,7 +520,6 @@ public:
 			reg.setMaterial(bf[2].material[i]);
 			bf[2].objs[i]->draw(reg.prog);
 		}
-		
 
 		//where each flower will go
 		vec3 flower_loc[7];
@@ -530,7 +535,8 @@ public:
 
 		std::vector<Entity> flowers;
 		for (int i = 0; i < 7; i++) {
-			Entity e = Entity(flower);
+			Entity e = Entity();
+      e.initEntity(flower);
 			e.setMaterials(0, 0.2, 0.1, 0.1, 0.94, 0.42, 0.64, 0.7, 0.23, 0.60, 100);
 			e.setMaterials(1, 0.1, 0.1, 0.1, 0.94, 0.72, 0.22, 0.23, 0.23, 0.20, 100);
 			e.setMaterials(2, 0.05, 0.15, 0.05, 0.24, 0.92, 0.41, 1, 1, 1, 0);
@@ -559,7 +565,8 @@ public:
 
 		std::vector<Entity> trees;
 		for (int i = 0; i < 7; i++) {
-			Entity e = Entity(tree1);
+			Entity e = Entity();
+      e.initEntity(tree1);
 			e.setMaterials(0, 0, 0, 0, 0.897093, 0.588047, 0.331905, 0.5, 0.5, 0.5, 200);
 			for (int j = 1; j < 12; j++) {
 				e.setMaterials(j, 0.1, 0.2, 0.1, 0.285989, 0.567238, 0.019148, 0.5, 0.5, 0.5, 200);
@@ -574,7 +581,6 @@ public:
 				trees[i].objs[j]->draw(reg.prog);
 			}
 		}
-
 
 
 
@@ -783,8 +789,6 @@ public:
 					sphere->draw(tex.prog);
 				Model->popMatrix();
 
-
-
 				Model->scale(vec3(0.12, 0.2, 0.12));
 				tex.setModel(Model);
 				sphere->draw(tex.prog);
@@ -801,7 +805,6 @@ public:
 		Model->popMatrix();
 
 		tex.unbindTexture(2);
-
 
 
 		//sky box!
@@ -861,8 +864,7 @@ public:
 		// Pop matrix stacks.
 		Projection->popMatrix();
 
-		// update transforms/positions/time of entities
-		motion.Update(entityTransforms, frametime);
+		bf.updateMotion(frametime);
 
 	}
 };
@@ -897,6 +899,8 @@ int main(int argc, char *argv[])
 	
 	application->initGeom(resourceDir);
 
+	float dt = 1 / 60.0;
+
 	auto lastTime = chrono::high_resolution_clock::now();
 
 	// Loop until the user closes the window.
@@ -912,6 +916,8 @@ int main(int argc, char *argv[])
 				.count();
 		// convert microseconds (weird) to seconds (less weird)
 		deltaTime *= 0.000001;
+
+		deltaTime = glm::min(deltaTime, dt);
 
 		// reset lastTime so that we can calculate the deltaTime
 		// on the next frame
