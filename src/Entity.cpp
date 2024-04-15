@@ -11,14 +11,15 @@
 using namespace std;
 using namespace glm;
 
-Entity::Entity(std::vector<std::shared_ptr<Shape>> ref) {
+Entity::Entity(){};
+
+void Entity::initEntity(std::vector<std::shared_ptr<Shape>> ref){
     objs = ref;
     for (int i = 0; i < ref.size(); i++) {
         materials m;
         material.push_back(m);
     }
 }
-
 
 void Entity::setMaterials(int i, float r1, float g1, float b1, float r2, float g2, float b2, 
     float r3, float g3, float b3, float s) {
@@ -33,4 +34,21 @@ void Entity::setMaterials(int i, float r1, float g1, float b1, float r2, float g
         material[i].matSpec.b = b3;
         material[i].matShine = s;
 }
+
+
+// TODO use our "game data structure" to manage all entity updates
+
+// velocity upon collision (bounds of world, or obstacle) and will rotate the model/"flip" the forward vector
+void Entity::updateMotion(float deltaTime) {
+        // Calculate dot product between forward vector and velocity
+        float dotProduct = glm::dot(glm::normalize(m.forward), m.velocity);
+        
+        // Update position based on dot product and velocity
+        position += dotProduct * m.forward * deltaTime;
+    
+        std::cout << "deltaTime: " << deltaTime << "entity position:" << position.x << ", " << position.y << ", " << position.z << std::endl;
+        
+        // TODO add collision component
+}
+
 

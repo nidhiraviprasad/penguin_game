@@ -19,16 +19,31 @@ typedef struct materials {
 } materials;
 
 
+struct motion {
+    // the velocity of the obstacles will be a constant speed in the forward direction
+    glm::vec3 velocity;
+    // a vector to inform which direction the object is facing
+    glm::vec3 forward; 
+};
+
+
 class Entity {
     public:
-
-        Entity(std::vector<std::shared_ptr<Shape>> ref);
+    
+        Entity();
+        
+        void initEntity(std::vector<std::shared_ptr<Shape>> ref);
 
         void setMaterials(int i, float r1, float g1, float b1, float r2, float g2, float b2, 
             float r3, float g3, float b3, float s);
 
-        
+        void updateMotion(float deltaTime);
+
         std::vector<std::shared_ptr<Shape>> objs;
         std::vector<materials> material;
-
+        glm::vec3 position;
+        motion m;
+        
 };
+
+
