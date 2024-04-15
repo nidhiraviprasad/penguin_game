@@ -46,11 +46,9 @@ void Entity::updateMotion(float deltaTime) {
         float dotProduct = glm::dot(glm::normalize(m.forward), m.velocity);
         
         // Update position based on dot product and velocity
-        // position += dotProduct * m.forward * deltaTime;
-        
-        position += vec3(.1, 0.0, 0.0);
+        position += dotProduct * m.forward * deltaTime;
     
-        std::cout << "entity position:" << position.x << ", " << position.y << ", " << position.z << std::endl;
+        std::cout << "deltaTime: " << deltaTime << "entity position:" << position.x << ", " << position.y << ", " << position.z << std::endl;
         
         // TODO add collision component
 }

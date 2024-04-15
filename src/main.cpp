@@ -336,6 +336,8 @@ public:
 		// init butterfly
 		bf.initEntity(butterfly);
 		bf.position = vec3(0.5, 0.2, 0.5);
+		bf.m.forward = vec3(1, 0, 0);
+		bf.m.velocity = vec3(1.0, 1.0, 1.0);
 		
 		//code to load in the ground plane (CPU defined data passed to GPU)
 		initGround();
@@ -934,6 +936,8 @@ int main(int argc, char *argv[])
 	
 	application->initGeom(resourceDir);
 
+	float dt = 1 / 60.0;
+
 	auto lastTime = chrono::high_resolution_clock::now();
 
 	// Loop until the user closes the window.
@@ -949,6 +953,8 @@ int main(int argc, char *argv[])
 				.count();
 		// convert microseconds (weird) to seconds (less weird)
 		deltaTime *= 0.000001;
+
+		deltaTime = glm::min(deltaTime, dt);
 
 		// reset lastTime so that we can calculate the deltaTime
 		// on the next frame
