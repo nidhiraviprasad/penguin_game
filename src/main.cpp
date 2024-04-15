@@ -337,7 +337,7 @@ public:
 		bf.initEntity(butterfly);
 		bf.position = vec3(0.5, 0.2, 0.5);
 		bf.m.forward = vec3(1, 0, 0);
-		bf.m.velocity = vec3(1.0, 1.0, 1.0);
+		bf.m.velocity = vec3(2.0, 2.0, 2.0);
 		
 		//code to load in the ground plane (CPU defined data passed to GPU)
 		initGround();
@@ -547,10 +547,18 @@ public:
 			{0.4, 0.2, 0.2, 0.94, 0.23, 0.20}
 		};
 
-		for(int i = 0; i<3 ; i ++){
-			SetModel(prog, bf.position, -0.8+(sTheta/2), 4.1+sTheta, 0.0, 0.01);
-			butterfly[i]->draw(prog);
-		}
+	
+		SetModel(prog, bf.position, -1.1, 4.1, 0, 0.01);
+		butterfly[0]->draw(prog);
+
+		// body up and down     //downwards      //forward and back
+		SetModel(prog, bf.position, -0.8+(sTheta/2), 4.1+sTheta, 0, 0.01); //left wing
+		butterfly[1]->draw(prog);
+		
+		// body up and down     //downwards      //forward and back
+		SetModel(prog, bf.position, -0.8+(sTheta/2), 4.1-sTheta, 0, 0.01); //right wing
+		butterfly[2]->draw(prog);
+
 		
 		for (int i = 0; i < 2; i++) {
 			SetModel(prog, vec3(-0.8, butterfly_height[i] + abs(cTheta), 0.9) + butterfly_loc[i], -1.1, 4.1, 0, 0.01); //body
