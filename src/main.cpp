@@ -14,7 +14,7 @@
 #include "WindowManager.h"
 #include "Texture.h"
 #include "stb_image.h"
-#include "Entity.h"
+// #include "Entity.h"
 #include "ShaderManager.h"
 
 #include <chrono>
@@ -291,15 +291,17 @@ public:
     
     // init butterfly 2
 		bf2.initEntity(butterfly);
-		bf2.position = vec3(1, 0.2, 0.5);
-		bf2.m.forward = vec3(.4, 0, 0);
-		bf2.m.velocity = vec3(0.5, 0.5, 0.5);
+		bf2.position = vec3(0.5, 0.2, 0.5);
+		bf2.m.forward = vec3(1, 0, 0);
+		bf2.m.velocity = vec3(4.0, 4.0, 4.0);
+    
     
     // init butterfly 3
 		bf3.initEntity(butterfly);
-		bf3.position = vec3(3.0, 0.2, -2.0);
-		bf3.m.forward = vec3(-1, 0, 0);
-		bf3.m.velocity = vec3(3.0, 3.0, 3.0);
+		bf3.position = vec3(4, 0.2, 0.5);
+		bf3.m.forward = vec3(1, 0, 0);
+		bf3.m.velocity = vec3(2.0, 2.0, 2.0);
+    
     
     bf.push_back(bf1);
     bf.push_back(bf2);
@@ -511,11 +513,11 @@ public:
 			bf[1].objs[i]->draw(reg.prog);
 		}
     
-    bf[2].setMaterials(0, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.25, 0.23, 0.30, 9);
+    	bf[2].setMaterials(0, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.25, 0.23, 0.30, 9);
 		bf[2].setMaterials(1, 0.3, 0.3, 0.2, 0.90, 0.73, 0.20, 0.9, 0.23, 0.20, 0.6);
 		bf[2].setMaterials(2, 0.3, 0.3, 0.2, 0.90, 0.73, 0.20, 0.9, 0.23, 0.20, 0.6);
 
-		reg.setModel(vec3(-0.8, butterfly_height[2] + abs(cTheta), 0.9) + butterfly_loc[2], -1.1, 4.1, 0, 0.01); //body
+		reg.setModel(bf[2].position, -1.1, 4.1, 0, 0.01); //body
 		for (int i = 0; i < 3; i++) {
 			reg.setMaterial(bf[2].material[i]);
 			bf[2].objs[i]->draw(reg.prog);
@@ -566,7 +568,7 @@ public:
 		std::vector<Entity> trees;
 		for (int i = 0; i < 7; i++) {
 			Entity e = Entity();
-      e.initEntity(tree1);
+      		e.initEntity(tree1);
 			e.setMaterials(0, 0, 0, 0, 0.897093, 0.588047, 0.331905, 0.5, 0.5, 0.5, 200);
 			for (int j = 1; j < 12; j++) {
 				e.setMaterials(j, 0.1, 0.2, 0.1, 0.285989, 0.567238, 0.019148, 0.5, 0.5, 0.5, 200);
@@ -864,7 +866,10 @@ public:
 		// Pop matrix stacks.
 		Projection->popMatrix();
 
-		bf.updateMotion(frametime);
+		for (int i = 0; i < 3; i ++){
+			bf[i].updateMotion(frametime);
+		}
+
 
 	}
 };
