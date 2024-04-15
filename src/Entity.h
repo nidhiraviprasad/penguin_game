@@ -29,8 +29,10 @@ struct motion {
 
 class Entity {
     public:
-
-        Entity(std::vector<std::shared_ptr<Shape>> ref);
+    
+        Entity();
+        
+        void initEntity(std::vector<std::shared_ptr<Shape>> ref);
 
         void setObjs(std::vector<std::shared_ptr<Shape>> ref);
 

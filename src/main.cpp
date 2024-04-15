@@ -49,11 +49,15 @@ public:
 	shared_ptr<Shape> sphere;
 
 	std::vector<shared_ptr<Shape>> butterfly;
+
+	Entity bf = Entity();
+
 	std::vector<shared_ptr<Shape>> flower;
 
 	std::vector<shared_ptr<Shape>> tree1;
 	
 	shared_ptr<Shape> cat;
+	
 
 	//global data for ground plane - direct load constant defined CPU data to GPU (not obj)
 	GLuint GrndBuffObj, GrndNorBuffObj, GrndTexBuffObj, GIndxBuffObj;
@@ -111,8 +115,6 @@ public:
 	//interpolation of keyframes for animation
 	int cur_idx = 0, next_idx = 1;
 	float frame = 0.0;
-
-
 
 	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 	{
@@ -331,10 +333,13 @@ public:
 			+ (tree1[0]->max.z - tree1[0]->min.z) * (tree1[0]->max.z - tree1[0]->min.z)
 		);
 
+		// init butterfly
+		bf.initEntity(butterfly);
+		bf.position = vec3(0.5, 0.2, 0.5);
+		
 		//code to load in the ground plane (CPU defined data passed to GPU)
 		initGround();
 	}
-
 
 	//directly pass quad for the ground to the GPU
 	void initGround() {
@@ -521,14 +526,10 @@ public:
 		butterfly_loc[1] = vec3(-2, -1.2, -3);
 		butterfly_loc[2] = vec3(4, -1, 4);
 
-
-		Entity bf(butterfly);
-
-		bf.position = vec3(0.5, 0.5, 0.5);
-
 		bf.setMaterials(0, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.25, 0.23, 0.30, 9);
 		bf.setMaterials(1, 0.4, 0.2, 0.2, 0.94, 0.23, 0.20, 0.9, 0.23, 0.20, 0.6);
 		bf.setMaterials(2, 0.4, 0.2, 0.2, 0.94, 0.23, 0.20, 0.9, 0.23, 0.20, 0.6);
+
 		SetModel(prog, vec3(-0.8, butterfly_height[0] + abs(cTheta), 0.9) + butterfly_loc[0], -1.1, 4.1, 0, 0.01); //body
 		for (int i = 0; i < 3; i++) {
 			glUniform3f(prog->getUniform("MatAmb"), bf.material[i].matAmb.r, bf.material[i].matAmb.g, bf.material[i].matAmb.b);
@@ -834,8 +835,6 @@ public:
 					sphere->draw(texProg);
 				Model->popMatrix();
 
-
-
 				Model->scale(vec3(0.12, 0.2, 0.12));
 				setModel(texProg, Model);
 				sphere->draw(texProg);
@@ -855,7 +854,6 @@ public:
 		Model->popMatrix();
 
 		texture2->unbind();
-
 
 
 		//sky box!

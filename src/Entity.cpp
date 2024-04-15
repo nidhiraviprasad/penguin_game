@@ -11,7 +11,9 @@
 using namespace std;
 using namespace glm;
 
-Entity::Entity(std::vector<std::shared_ptr<Shape>> ref) {
+Entity::Entity(){};
+
+void Entity::initEntity(std::vector<std::shared_ptr<Shape>> ref){
     objs = ref;
     for (int i = 0; i < ref.size(); i++) {
         materials m;
@@ -40,12 +42,14 @@ void Entity::setMaterials(int i, float r1, float g1, float b1, float r2, float g
 
 // velocity upon collision (bounds of world, or obstacle) and will rotate the model/"flip" the forward vector
 void Entity::updateMotion(float deltaTime) {
-        // // Calculate dot product between forward vector and velocity
-        // float dotProduct = glm::dot(glm::normalize(m.forward), m.velocity);
+        // Calculate dot product between forward vector and velocity
+        float dotProduct = glm::dot(glm::normalize(m.forward), m.velocity);
         
-        // // Update position based on dot product and velocity
+        // Update position based on dot product and velocity
         // position += dotProduct * m.forward * deltaTime;
-        position += .1;
+        
+        position += vec3(.1, 0.0, 0.0);
+    
         std::cout << "entity position:" << position.x << ", " << position.y << ", " << position.z << std::endl;
         
         // TODO add collision component
