@@ -14,7 +14,6 @@
 #include "WindowManager.h"
 #include "Texture.h"
 #include "stb_image.h"
-#include "Motion.h" 
 #include "Entity.h"
 
 
@@ -92,18 +91,6 @@ public:
 	//rules for cat walking around
 	bool animate = false;
 	bool back_up = false;
-
-	// make an array of all the entity transforms 
-	// TODO use our "game data structure" to populate this, as we need entity objects to populate the array
-	
-	vector<TransformComponent> entityTransforms = {{vec3(2.0, 0.0, 2.0), vec3(0.0, 0.0, 2.0), vec3(0.0, 0.0, 1.0)}};
-	// TransformComponent butterfly1 = {vec3(2.0, 0.5, 2.0), vec3(0.0, 0.0, 3.0), vec3(0.0, 0.0, 1.0)};
-	// entityTransforms.push_back(butterfly1);
-
-	// Make instance of movement class, with preset width and height variables
-	// these are the width and height of the grid/plane/ground
-    Motion motion = Motion(10.0, 10.0, 10.0);
-
 	
 	//keyframes for cat walking animation
 	double f[5][12] = {
@@ -536,6 +523,9 @@ public:
 
 
 		Entity bf(butterfly);
+
+		bf.position = vec3(0.5, 0.5, 0.5);
+
 		bf.setMaterials(0, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.25, 0.23, 0.30, 9);
 		bf.setMaterials(1, 0.4, 0.2, 0.2, 0.94, 0.23, 0.20, 0.9, 0.23, 0.20, 0.6);
 		bf.setMaterials(2, 0.4, 0.2, 0.2, 0.94, 0.23, 0.20, 0.9, 0.23, 0.20, 0.6);
@@ -547,9 +537,6 @@ public:
 			glUniform1f(prog->getUniform("MatShine"), bf.material[i].matShine);
 			butterfly[i]->draw(prog);
 		}
-		
-
-
 
 		float butterfly_colors[3][6] {
 			{0.3, 0.3, 0.2, 0.90, 0.73, 0.20},
@@ -557,11 +544,8 @@ public:
 			{0.4, 0.2, 0.2, 0.94, 0.23, 0.20}
 		};
 
-
-
 		for(int i = 0; i<3 ; i ++){
-			vec3 pos_fly = entityTransforms[0].position;
-			SetModel(prog, pos_fly, -0.8+(sTheta/2), 4.1+sTheta, 0.0, 0.01);
+			SetModel(prog, bf.position, -0.8+(sTheta/2), 4.1+sTheta, 0.0, 0.01);
 			butterfly[i]->draw(prog);
 		}
 		
@@ -585,7 +569,6 @@ public:
 			SetModel(prog, vec3(-0.8, butterfly_height[i] + abs(cTheta), 0.9) + butterfly_loc[i], -0.8+(sTheta/2), 4.1-sTheta, 0, 0.01); //right wing
 			butterfly[2]->draw(prog);
 						
-
 		}
 
 
@@ -921,8 +904,7 @@ public:
 		// Pop matrix stacks.
 		Projection->popMatrix();
 
-		// update transforms/positions/time of entities
-		motion.Update(entityTransforms, frametime);
+		bf.updateMotion(frametime);
 
 	}
 };
