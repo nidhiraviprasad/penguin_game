@@ -537,7 +537,6 @@ public:
 			flowers.push_back(e);
 		}
 
-		//reg.setModel(vec3(4, -1, 4), cTheta*cTheta, 0, 0, 2.5);
 		for (int i = 0; i < 7; i++) {
 					
 			reg.setModel(flower_loc[i], cTheta*cTheta+0.03, 0, 0, 2.5); 
@@ -574,8 +573,6 @@ public:
 				trees[i].objs[j]->draw(reg.prog);
 			}
 		}
-
-
 
 
 		reg.prog->unbind();
