@@ -16,6 +16,7 @@
 #include "stb_image.h"
 // #include "Entity.h"
 #include "ShaderManager.h"
+#include "Camera.h"
 
 #include <chrono>
 
@@ -86,14 +87,15 @@ public:
 	vec3 view = vec3(0, 0, 1);
 	vec3 strafe = vec3(1, 0, 0);
 	vec3 g_eye = vec3(0, 0.5, 5);
-	float pitch = 17;
-	float dist = 4;
-	float angle = 0;
 
+	// float pitch = 17;
+	// float dist = 4;
+	// float angle = 0;
+
+	Camera c = Camera(vec3(0, 0, 1), 17, 4, 0, vec3(0, -1.12, 0));
 
 	//player animation
 	float player_rot = 0;
-	vec3 player_pos = vec3(0, -1.12, 0);
 	float oscillate = 0;
 
 	//rules for cat walking around
@@ -136,11 +138,11 @@ public:
 			animate = true;
 		}
 		if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT) && !back_up && bounds < 19){
-			player_pos += vec3(sin(player_rot) * 0.1, 0, cos(player_rot) * 0.1);
+			c.player_pos += vec3(sin(player_rot) * 0.1, 0, cos(player_rot) * 0.1);
 			animate = true;
 		}
 		if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT) && bounds < 19){
-			player_pos -= vec3(sin(player_rot) * 0.1, 0, cos(player_rot) * 0.1);
+			c.player_pos -= vec3(sin(player_rot) * 0.1, 0, cos(player_rot) * 0.1);
 			animate = true;
 		}
 		if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
@@ -412,16 +414,16 @@ public:
      }
 
 
-	void SetView(shared_ptr<Program> shader) {
-		float horiz = dist * cos(pitch * 0.01745329);   // for third person camera - calculate horizontal and
-		float vert = dist * sin(pitch * 0.01745329);    // vertical offset based on maintained distance
-		float offX = horiz * sin(angle);				// rotation around cat
-		float offZ = horiz * cos(angle);
+	// void SetView(shared_ptr<Program> shader) {
+	// 	float horiz = dist * cos(pitch * 0.01745329);   // for third person camera - calculate horizontal and
+	// 	float vert = dist * sin(pitch * 0.01745329);    // vertical offset based on maintained distance
+	// 	float offX = horiz * sin(angle);				// rotation around cat
+	// 	float offZ = horiz * cos(angle);
 
-		g_eye = vec3(player_pos[0] - offX, player_pos[1] + vert, player_pos[2] - offZ);
-  		glm::mat4 Cam = glm::lookAt(g_eye, player_pos, vec3(0, 1, 0));
-  		glUniformMatrix4fv(shader->getUniform("V"), 1, GL_FALSE, value_ptr(Cam));
-	}
+	// 	g_eye = vec3(player_pos[0] - offX, player_pos[1] + vert, player_pos[2] - offZ);
+  	// 	glm::mat4 Cam = glm::lookAt(g_eye, player_pos, vec3(0, 1, 0));
+  	// 	glUniformMatrix4fv(shader->getUniform("V"), 1, GL_FALSE, value_ptr(Cam));
+	// }
 
 	//used for checking collisions
 	void check_collision(vec3 f_list[], int len1, vec3 t_list[], int len2, vec3 cat_pos) {
@@ -429,8 +431,8 @@ public:
 		back_up = false;
 		for (int i = 0; i < len1; i++) {
 			float distance = std::sqrt(
-				(f_list[i][0] - player_pos[0]) * (f_list[i][0] - player_pos[0])
-				+ (f_list[i][2] - player_pos[2]) * (f_list[i][2] - player_pos[2])
+				(f_list[i][0] - c.player_pos[0]) * (f_list[i][0] - c.player_pos[0])
+				+ (f_list[i][2] - c.player_pos[2]) * (f_list[i][2] - c.player_pos[2])
 			);
 			distance = std::abs(distance);
 			if (distance < flower_radial + 0.4) {
@@ -441,8 +443,8 @@ public:
 		//then check all trees
 		for (int i = 0; i < len2; i++) {
 			float distance = std::sqrt(
-				(t_list[i][0] - player_pos[0]) * (t_list[i][0] - player_pos[0])
-				+ (t_list[i][2] - player_pos[2]) * (t_list[i][2] - player_pos[2])
+				(t_list[i][0] - c.player_pos[0]) * (t_list[i][0] - c.player_pos[0])
+				+ (t_list[i][2] - c.player_pos[2]) * (t_list[i][2] - c.player_pos[2])
 			);
 			distance = std::abs(distance);
 			if (distance < 0.9) {
@@ -482,11 +484,10 @@ public:
 		//material shader first
 		reg.prog->bind();
 		glUniformMatrix4fv(reg.prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-		SetView(reg.prog);
+		c.SetView(reg.prog);
 
 		float butterfly_height[3] = {1.1, 1.7, 1.5};
 
-		
 		vec3 butterfly_loc[3];
 		butterfly_loc[0] = vec3(-2.3, -1, 3);
 		butterfly_loc[1] = vec3(-2, -1.2, -3);
@@ -594,7 +595,7 @@ public:
 		tex.prog->bind();
 		glUniformMatrix4fv(tex.prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 
-		SetView(tex.prog);
+		c.SetView(tex.prog);
 
 
 		materials c;
