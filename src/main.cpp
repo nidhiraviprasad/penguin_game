@@ -85,19 +85,16 @@ public:
 	//camera
 	double g_theta;
 	vec3 strafe = vec3(1, 0, 0);
-	vec3 g_eye = vec3(0, 0.5, 5);
 
-	// float pitch = 17;
-	// float dist = 4;
-	// float angle = 0;
-
-	Camera c = Camera(vec3(0, 0, 1), 17, 4, 0, vec3(0, -1.12, 0), 0);
+	// 					view 		pitch dist angle playerpos playerrot animate g_eye
+	Camera cam = Camera(vec3(0, 0, 1), 17, 4, 0, vec3(0, -1.12, 0), 0, vec3(0, 0.5, 5));
 
 	//player animation
+	bool animate = false;
 	float oscillate = 0;
 
 	//rules for cat walking around
-	bool animate = false;
+
 	bool back_up = false;
 	
 	//keyframes for cat walking animation
@@ -126,21 +123,21 @@ public:
 		{
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
-		animate = false;
+			animate = false;
 		if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)&& !back_up){
-			c.player_rot -= 10 * 0.01745329;
+			cam.player_rot -= 10 * 0.01745329;
 			animate = true;
 		}
 		if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT) && !back_up){
-			c.player_rot += 10 * 0.01745329;
+			cam.player_rot += 10 * 0.01745329;
 			animate = true;
 		}
 		if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT) && !back_up && bounds < 19){
-			c.player_pos += vec3(sin(c.player_rot) * 0.1, 0, cos(c.player_rot) * 0.1);
+			cam.player_pos += vec3(sin(cam.player_rot) * 0.1, 0, cos(cam.player_rot) * 0.1);
 			animate = true;
 		}
 		if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT) && bounds < 19){
-			c.player_pos -= vec3(sin(c.player_rot) * 0.1, 0, cos(c.player_rot) * 0.1);
+			cam.player_pos -= vec3(sin(cam.player_rot) * 0.1, 0, cos(cam.player_rot) * 0.1);
 			animate = true;
 		}
 		if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
@@ -148,21 +145,24 @@ public:
 		}
 	}
 
+
+	void scrollCallback(GLFWwindow* window, double deltaX, double deltaY) {
+		cout << "xDel + yDel " << deltaX << " " << deltaY << endl;
+		cam.angle -= 10 * (deltaX / 57.296);
+	}
+
+
 	void mouseCallback(GLFWwindow *window, int button, int action, int mods)
 	{
 		double posX, posY;
 
 		if (action == GLFW_PRESS)
 		{
-			 glfwGetCursorPos(window, &posX, &posY);
-			 cout << "Pos X " << posX <<  " Pos Y " << posY << endl;
+			glfwGetCursorPos(window, &posX, &posY);
+			cout << "Pos X " << posX <<  " Pos Y " << posY << endl;
 		}
 	}
 
-	void scrollCallback(GLFWwindow* window, double deltaX, double deltaY) {
-   		cout << "xDel + yDel " << deltaX << " " << deltaY << endl;
-		c.angle -= 10 * (deltaX / 57.296);
-	}
 
 	void resizeCallback(GLFWwindow *window, int width, int height)
 	{
@@ -411,26 +411,14 @@ public:
   		s.prog->unbind();
      }
 
-
-	// void SetView(shared_ptr<Program> shader) {
-	// 	float horiz = dist * cos(pitch * 0.01745329);   // for third person camera - calculate horizontal and
-	// 	float vert = dist * sin(pitch * 0.01745329);    // vertical offset based on maintained distance
-	// 	float offX = horiz * sin(angle);				// rotation around cat
-	// 	float offZ = horiz * cos(angle);
-
-	// 	g_eye = vec3(player_pos[0] - offX, player_pos[1] + vert, player_pos[2] - offZ);
-  	// 	glm::mat4 Cam = glm::lookAt(g_eye, player_pos, vec3(0, 1, 0));
-  	// 	glUniformMatrix4fv(shader->getUniform("V"), 1, GL_FALSE, value_ptr(Cam));
-	// }
-
 	//used for checking collisions
 	void check_collision(vec3 f_list[], int len1, vec3 t_list[], int len2, vec3 cat_pos) {
 		//first check all flowers
 		back_up = false;
 		for (int i = 0; i < len1; i++) {
 			float distance = std::sqrt(
-				(f_list[i][0] - c.player_pos[0]) * (f_list[i][0] - c.player_pos[0])
-				+ (f_list[i][2] - c.player_pos[2]) * (f_list[i][2] - c.player_pos[2])
+				(f_list[i][0] - cam.player_pos[0]) * (f_list[i][0] - cam.player_pos[0])
+				+ (f_list[i][2] - cam.player_pos[2]) * (f_list[i][2] - cam.player_pos[2])
 			);
 			distance = std::abs(distance);
 			if (distance < flower_radial + 0.4) {
@@ -441,8 +429,8 @@ public:
 		//then check all trees
 		for (int i = 0; i < len2; i++) {
 			float distance = std::sqrt(
-				(t_list[i][0] - c.player_pos[0]) * (t_list[i][0] - c.player_pos[0])
-				+ (t_list[i][2] - c.player_pos[2]) * (t_list[i][2] - c.player_pos[2])
+				(t_list[i][0] - cam.player_pos[0]) * (t_list[i][0] - cam.player_pos[0])
+				+ (t_list[i][2] - cam.player_pos[2]) * (t_list[i][2] - cam.player_pos[2])
 			);
 			distance = std::abs(distance);
 			if (distance < 0.9) {
@@ -478,11 +466,10 @@ public:
 		Projection->perspective(45.0f, aspect, 0.01f, 100.0f);
 
 		
-		
 		//material shader first
 		reg.prog->bind();
 		glUniformMatrix4fv(reg.prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-		c.SetView(reg.prog);
+		cam.SetView(reg.prog);
 
 		float butterfly_height[3] = {1.1, 1.7, 1.5};
 
@@ -593,7 +580,7 @@ public:
 		tex.prog->bind();
 		glUniformMatrix4fv(tex.prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 
-		c.SetView(tex.prog);
+		cam.SetView(tex.prog);
 
 
 		materials c;
@@ -614,8 +601,8 @@ public:
 
 		//hierarchical modeling with cat!!
 		Model->pushMatrix();
-			Model->translate(c.player_pos + vec3(0, cos(oscillate) * 0.009, 0));
-			Model->rotate(c.player_rot, vec3(0, 1, 0));
+			Model->translate(cam.player_pos + vec3(0, cos(oscillate) * 0.009, 0));
+			Model->rotate(cam.player_rot, vec3(0, 1, 0));
 			Model->scale(vec3(0.7, 0.7, 0.7));
 
 			
@@ -856,8 +843,8 @@ public:
 		oscillate += 0.02; //to make sure cat is not entirely stagnant
 
 		bounds = std::sqrt(   //update cat's distance from skybox
-			player_pos[0] * player_pos[0]
-			+ player_pos[2] * player_pos[2]
+			cam.player_pos[0] * cam.player_pos[0]
+			+ cam.player_pos[2] * cam.player_pos[2]
 		);
 
 		// Pop matrix stacks.

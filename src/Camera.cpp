@@ -1,35 +1,32 @@
-#include <iostream>
-#include <assert.h>
+#include <memory>
 #include "Camera.h"
-#include "GLSL.h"
 
 using namespace std;
 using namespace glm;
 
-Camera::Camera(glm::vec3 v, float p, float d, float a, vec3 pp, float pr)
+Camera::Camera(vec3 v, float p, float d, float a, vec3 pp, float pr, vec3 g)
 {   
-    public: 
-        cameraPos = vec3(0.0f, 0.0f, 4.0f);
-        lookAtPt = vec3(0.0f, 0.0f, 0.0f);
-        upV = vec3(0, 1, 0);
-        player_pos = pp;
-        player_rot = pr;
-        view = v;
-        pitch = p;
-        dist = d;
-        angle = a;
-        horiz;
-        vert;
-        offX;
-        offZ;
-
+    cameraPos = vec3(0.0f, 0.0f, 4.0f);
+    lookAtPt = vec3(0.0f, 0.0f, 0.0f);
+    upV = vec3(0, 1, 0);
+    player_pos = pp;
+    player_rot = pr;
+    view = v;
+    pitch = p;
+    dist = d;
+    angle = a;
+    horiz;
+    vert;
+    offX;
+    offZ;
+    g_eye = g;
 }
 
 Camera::~Camera()
 {
 }
 
-Camera::SetView(shared_ptr<Program> shader) {
+void Camera::SetView(std::shared_ptr<Program> shader) {
     horiz = dist * cos(pitch * 0.01745329);   // for third person camera - calculate horizontal and
     vert = dist * sin(pitch * 0.01745329);    // vertical offset based on maintained distance
     offX = horiz * sin(angle);				// rotation around cat
@@ -39,4 +36,3 @@ Camera::SetView(shared_ptr<Program> shader) {
     glm::mat4 Cam = glm::lookAt(g_eye, player_pos, vec3(0, 1, 0));
     glUniformMatrix4fv(shader->getUniform("V"), 1, GL_FALSE, value_ptr(Cam));
 }
-
