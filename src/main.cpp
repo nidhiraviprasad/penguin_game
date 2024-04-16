@@ -57,16 +57,26 @@ public:
 
 
 	Entity bf1 = Entity();
-  Entity bf2 = Entity();
-  Entity bf3 = Entity();
-  Entity catEnt = Entity();
-  
-  std::vector<Entity> bf;
+	Entity bf2 = Entity();
+	Entity bf3 = Entity();
+	Entity catEnt = Entity();
+	
+  	std::vector<Entity> bf;
 
 	std::vector<shared_ptr<Shape>> flower;
 
 	std::vector<shared_ptr<Shape>> tree1;
 	
+	std::vector<shared_ptr<Shape>> cat;
+
+	std::vector<Entity> gameObjects;
+	
+	std::vector<Entity> trees;
+
+	std::vector<Entity> flowers;
+
+	int bf_flags[3] = {0, 0, 0};
+
 
 	int nextID = 0;
 
@@ -293,28 +303,41 @@ public:
 
 		// init butterfly 1
 		bf1.initEntity(butterfly);
-		bf1.position = vec3(0.5, 0.2, 0.5);
+		bf1.position = vec3(2, -0.3, -1);
 		bf1.m.forward = vec3(1, 0, 0);
 		bf1.m.velocity = vec3(2.0, 2.0, 2.0);
 		bf1.collider = new Collider(butterfly, Collider::BUTTERFLY);
 		bf1.collider->SetEntityID(bf1.id);
+		cout << "butterfly 1 " << bf1.id << endl;
+		bf1.collider->entityName = 'b';
+		bf1.scale = 0.01;
     
     	// init butterfly 2
 		bf2.initEntity(butterfly);
-		bf2.position = vec3(0.5, 0.2, 0.5);
+		bf2.position = vec3(-2, -0.3, 0.5);
 		bf2.m.forward = vec3(1, 0, 0);
 		bf2.m.velocity = vec3(4.0, 4.0, 4.0);
 		bf2.collider = new Collider(butterfly, Collider::BUTTERFLY);
 		bf2.collider->SetEntityID(bf2.id);
+		cout << "butterfly 2 " << bf2.id << endl;
+		bf2.collider->entityName = 'b';
+		
+		bf2.scale = 0.01;
+
     
    		 // init butterfly 3
 		bf3.initEntity(butterfly);
-		bf3.position = vec3(4, 0.2, 0.5);
-
+		bf3.position = vec3(4, -0.3, 0.5);
 		bf3.m.forward = vec3(1, 0, 0);
 		bf3.m.velocity = vec3(2.0, 2.0, 2.0);
 		bf3.collider = new Collider(butterfly, Collider::BUTTERFLY);
 		bf3.collider->SetEntityID(bf3.id);
+		cout << "butterfly 3 " << bf3.id << endl;
+		bf3.collider->entityName = 'b';
+	
+		bf3.scale = 0.01;
+
+
 
 		// init cat entity
 		catEnt.initEntity(cat);
@@ -325,6 +348,9 @@ public:
 		catEnt.collider = new Collider(cat, Collider::CAT);
 		catEnt.collider->SetEntityID(catEnt.id);
 		gameObjects.push_back(catEnt);
+		
+		cout << "cat " << catEnt.id << endl;
+		catEnt.collider->entityName = 'c';
 
 		// vec3 tree_loc[7];
 		// tree_loc[0] = vec3(4, -5.5, 7);
@@ -381,6 +407,10 @@ public:
 	gameObjects.push_back(bf2);
 	gameObjects.push_back(bf3);
 
+	cout << "butterfly entities size = " << bf.size() << endl;
+	for(int i = 0; i < bf.size(); i++){
+		cout << "bf[" << i << "] id is " << bf[i].id << endl;
+	}
     cout << "gameObjects size = " << gameObjects.size() << endl;
 
 		//code to load in the ground plane (CPU defined data passed to GPU)
@@ -570,7 +600,7 @@ public:
 		bf[0].setMaterials(1, 0.4, 0.2, 0.2, 0.94, 0.23, 0.20, 0.9, 0.23, 0.20, 0.6);
 		bf[0].setMaterials(2, 0.4, 0.2, 0.2, 0.94, 0.23, 0.20, 0.9, 0.23, 0.20, 0.6);
 
-		reg.setModel(bf[0].position, -1.1, 4.1, 0, 0.01); //body
+		reg.setModel(bf[0].position, -1.1, 4.1, 0, bf[0].scale); //body
 
 		for (int i = 0; i < 3; i++) {
 			reg.setMaterial(bf[0].material[i]);
@@ -581,7 +611,7 @@ public:
 		bf[1].setMaterials(1, 0.2, 0.3, 0.3, 0.20, 0.73, 0.80, 0.9, 0.23, 0.20, 0.6);
 		bf[1].setMaterials(2, 0.2, 0.3, 0.3, 0.20, 0.73, 0.80, 0.9, 0.23, 0.20, 0.6);
 
-		reg.setModel(bf[1].position, -1.1, 4.1, 0, 0.01); //body
+		reg.setModel(bf[1].position, -1.1, 4.1, 0, bf[1].scale); //body
 		for (int i = 0; i < 3; i++) {
 			reg.setMaterial(bf[1].material[i]);
 			bf[1].objs[i]->draw(reg.prog);
@@ -591,7 +621,7 @@ public:
 		bf[2].setMaterials(1, 0.3, 0.3, 0.2, 0.90, 0.73, 0.20, 0.9, 0.23, 0.20, 0.6);
 		bf[2].setMaterials(2, 0.3, 0.3, 0.2, 0.90, 0.73, 0.20, 0.9, 0.23, 0.20, 0.6);
 
-		reg.setModel(bf[2].position, -1.1, 4.1, 0, 0.01); //body
+		reg.setModel(bf[2].position, -1.1, 4.1, 0, bf[2].scale); //body
 		for (int i = 0; i < 3; i++) {
 			reg.setMaterial(bf[2].material[i]);
 			bf[2].objs[i]->draw(reg.prog);
@@ -869,9 +899,19 @@ public:
 		drawGround(tex);  //draw ground here
 
 
+		catEnt.position = player_pos;
 		//halt animations if cat collides with flower or tree
 		cout << catEnt.position.x << ", " << catEnt.position.y << ", " << catEnt.position.z << endl;
-		catEnt.collider->CheckCollision(gameObjects, catEnt.id);
+		cout << "before calling check collision, catID = " << catEnt.id << endl;
+		int collided = catEnt.collider->CatCollision(bf, &catEnt);
+
+		if (collided != -1) {
+			bf_flags[collided] = 1;
+		}
+
+
+
+
 		cout << "cat collision = " << catEnt.collider->IsColliding() <<  endl;
 	//	check_collision(flower_loc, 7, tree_loc, 7, player_pos);
 		
@@ -898,6 +938,9 @@ public:
 		Projection->popMatrix();
 
 		for (int i = 0; i < 3; i ++){
+			if (bf_flags[i] == 1) {
+				bf[i].scale *= 0.95f;
+			}
 			bf[i].updateMotion(frametime);
 		}
 
