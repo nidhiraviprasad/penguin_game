@@ -51,10 +51,10 @@ public:
 	std::vector<shared_ptr<Shape>> butterfly;
 
 	Entity bf1 = Entity();
-  Entity bf2 = Entity();
-  Entity bf3 = Entity();
+  	Entity bf2 = Entity();
+  	Entity bf3 = Entity();
   
-  std::vector<Entity> bf;
+ 	std::vector<Entity> bf;
 
 	std::vector<shared_ptr<Shape>> flower;
 
