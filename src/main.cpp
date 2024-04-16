@@ -10,6 +10,7 @@
 #include "GLSL.h"
 #include "Program.h"
 #include "Shape.h"
+#include "Collider.h"
 #include "MatrixStack.h"
 #include "WindowManager.h"
 #include "Texture.h"
@@ -290,6 +291,7 @@ public:
 		bf1.position = vec3(0.5, 0.2, 0.5);
 		bf1.m.forward = vec3(1, 0, 0);
 		bf1.m.velocity = vec3(2.0, 2.0, 2.0);
+		Collider* bf1Col = new Collider(butterfly, Collider::BUTTERFLY);
     
     // init butterfly 2
 		bf2.initEntity(butterfly);
@@ -540,7 +542,7 @@ public:
 		std::vector<Entity> flowers;
 		for (int i = 0; i < 7; i++) {
 			Entity e = Entity();
-      e.initEntity(flower);
+      		e.initEntity(flower);
 			e.setMaterials(0, 0.2, 0.1, 0.1, 0.94, 0.42, 0.64, 0.7, 0.23, 0.60, 100);
 			e.setMaterials(1, 0.1, 0.1, 0.1, 0.94, 0.72, 0.22, 0.23, 0.23, 0.20, 100);
 			e.setMaterials(2, 0.05, 0.15, 0.05, 0.24, 0.92, 0.41, 1, 1, 1, 0);

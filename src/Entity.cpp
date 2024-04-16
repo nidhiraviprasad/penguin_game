@@ -4,6 +4,7 @@
 
 #include "Entity.h"
 #include "Shape.h"
+#include "Collider.h"
 
 
 

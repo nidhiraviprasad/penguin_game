@@ -25,14 +25,6 @@ struct motion {
     glm::vec3 forward; 
 };
 
-
-struct motion {
-    // the velocity of the obstacles will be a constant speed in the forward direction
-    glm::vec3 velocity;
-    // a vector to inform which direction the object is facing
-    glm::vec3 forward; 
-};
-
 class Collider; // forward declaration to enable use of this class in Collider class
 
 class Entity {
@@ -42,16 +34,15 @@ class Entity {
         
         void initEntity(std::vector<std::shared_ptr<Shape>> ref);
 
-            void setMaterials(int i, float r1, float g1, float b1, float r2, float g2, float b2, 
-                float r3, float g3, float b3, float s);
+        void setMaterials(int i, float r1, float g1, float b1, float r2, float g2, float b2, 
+            float r3, float g3, float b3, float s);
 
-            void updateMotion(float deltaTime);
+        void updateMotion(float deltaTime);
 
-            int id;
-            std::vector<std::shared_ptr<Shape>> objs;
-            std::vector<materials> material;
-            Components::TransformComponent transform;
-            Collider collider;
+        int id;
+        std::vector<std::shared_ptr<Shape>> objs;
+        std::vector<materials> material;
+        Collider* collider;
         glm::vec3 position;
         motion m;
         
