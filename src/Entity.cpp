@@ -4,12 +4,11 @@
 
 #include "Entity.h"
 #include "Shape.h"
-
-
-
+#include "Collider.h"
 
 using namespace std;
 using namespace glm;
+
 
 Entity::Entity(){};
 
@@ -19,6 +18,10 @@ void Entity::initEntity(std::vector<std::shared_ptr<Shape>> ref){
         materials m;
         material.push_back(m);
     }
+    id = NEXT_ID;
+    cout << "entity created with id " << id << endl;
+    NEXT_ID++;
+    cout << "NEXTID is now " << NEXT_ID << endl;
 }
 
 void Entity::setMaterials(int i, float r1, float g1, float b1, float r2, float g2, float b2, 
@@ -35,6 +38,9 @@ void Entity::setMaterials(int i, float r1, float g1, float b1, float r2, float g
         material[i].matShine = s;
 }
 
+void Entity::updateScale(float newScale){
+    scale = newScale;
+}
 
 // TODO use our "game data structure" to manage all entity updates
 
@@ -50,6 +56,7 @@ void Entity::updateMotion(float deltaTime) {
         std::cout << "deltaTime: " << deltaTime << "entity position:" << position.x << ", " << position.y << ", " << position.z << std::endl;
         
         // TODO add collision component
+
 }
 
 

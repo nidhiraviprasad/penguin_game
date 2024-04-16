@@ -3,7 +3,6 @@
 
 #include "Components.h"
 
-
 typedef struct color_vals{
     float r;
     float g;
@@ -26,6 +25,7 @@ struct motion {
     glm::vec3 forward; 
 };
 
+class Collider; // forward declaration to enable use of this class in Collider class
 
 class Entity {
     public:
@@ -39,11 +39,17 @@ class Entity {
 
         void updateMotion(float deltaTime);
 
+        void updateScale(float newScale);
+
+        static int NEXT_ID; // initializes to 0 and increments with every call to initEntity()
+        int id;
         std::vector<std::shared_ptr<Shape>> objs;
         std::vector<materials> material;
+        Collider* collider;
         glm::vec3 position;
+        float scale;
         motion m;
-        
-};
+ 
+    };
 
 
