@@ -80,8 +80,6 @@ public:
 
 	int nextID = 0;
 
-	shared_ptr<Shape> cat;
-
 	//global data for ground plane - direct load constant defined CPU data to GPU (not obj)
 	GLuint GrndBuffObj, GrndNorBuffObj, GrndTexBuffObj, GIndxBuffObj;
 	int g_GiboLen;
@@ -143,15 +141,15 @@ public:
 
 		animate = false;
 		if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)&& !catEnt.collider->IsColliding()){
-			player_rot -= 10 * 0.01745329;
+			cam.player_rot -= 10 * 0.01745329;
 			animate = true;
 		}
 		if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT) && !catEnt.collider->IsColliding()){
-			player_rot += 10 * 0.01745329;
+			cam.player_rot += 10 * 0.01745329;
 			animate = true;
 		}
 		if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT) && !catEnt.collider->IsColliding() && bounds < 19){
-			player_pos += vec3(sin(player_rot) * 0.1, 0, cos(player_rot) * 0.1);
+			cam.player_pos += vec3(sin(cam.player_rot) * 0.1, 0, cos(cam.player_rot) * 0.1);
 			animate = true;
 		}
 		if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT) && bounds < 19){
@@ -305,7 +303,7 @@ public:
 		bf1.initEntity(butterfly);
 		bf1.position = vec3(2, -0.3, -1);
 		bf1.m.forward = vec3(1, 0, 0);
-		bf1.m.velocity = vec3(2.0, 2.0, 2.0);
+		bf1.m.velocity = vec3(.20, 0, .20);
 		bf1.collider = new Collider(butterfly, Collider::BUTTERFLY);
 		bf1.collider->SetEntityID(bf1.id);
 		cout << "butterfly 1 " << bf1.id << endl;
@@ -316,7 +314,7 @@ public:
 		bf2.initEntity(butterfly);
 		bf2.position = vec3(-2, -0.3, 0.5);
 		bf2.m.forward = vec3(1, 0, 0);
-		bf2.m.velocity = vec3(4.0, 4.0, 4.0);
+		bf2.m.velocity = vec3(.40, 0, .40);
 		bf2.collider = new Collider(butterfly, Collider::BUTTERFLY);
 		bf2.collider->SetEntityID(bf2.id);
 		cout << "butterfly 2 " << bf2.id << endl;
@@ -329,7 +327,7 @@ public:
 		bf3.initEntity(butterfly);
 		bf3.position = vec3(4, -0.3, 0.5);
 		bf3.m.forward = vec3(1, 0, 0);
-		bf3.m.velocity = vec3(2.0, 2.0, 2.0);
+		bf3.m.velocity = vec3(.20, 0, .20);
 		bf3.collider = new Collider(butterfly, Collider::BUTTERFLY);
 		bf3.collider->SetEntityID(bf3.id);
 		cout << "butterfly 3 " << bf3.id << endl;
@@ -341,7 +339,7 @@ public:
 
 		// init cat entity
 		catEnt.initEntity(cat);
-		catEnt.position = player_pos;
+		catEnt.position = cam.player_pos;
 		cout << catEnt.position.x << ", " << catEnt.position.y << ", " << catEnt.position.z << endl;
 		// set forward
 		// set velocity
@@ -518,16 +516,16 @@ public:
      }
 
 
-	void SetView(shared_ptr<Program> shader) {
-		float horiz = dist * cos(pitch * 0.01745329);   // for third person camera - calculate horizontal and
-		float vert = dist * sin(pitch * 0.01745329);    // vertical offset based on maintained distance
-		float offX = horiz * sin(angle);				// rotation around cat
-		float offZ = horiz * cos(angle);
+	// void SetView(shared_ptr<Program> shader) {
+	// 	float horiz = dist * cos(pitch * 0.01745329);   // for third person camera - calculate horizontal and
+	// 	float vert = dist * sin(pitch * 0.01745329);    // vertical offset based on maintained distance
+	// 	float offX = horiz * sin(angle);				// rotation around cat
+	// 	float offZ = horiz * cos(angle);
 
-		g_eye = vec3(player_pos[0] - offX, player_pos[1] + vert, player_pos[2] - offZ);
-  		glm::mat4 Cam = glm::lookAt(g_eye, player_pos, vec3(0, 1, 0));
-  		glUniformMatrix4fv(shader->getUniform("V"), 1, GL_FALSE, value_ptr(Cam));
-	}
+	// 	g_eye = vec3(player_pos[0] - offX, player_pos[1] + vert, player_pos[2] - offZ);
+  	// 	glm::mat4 Cam = glm::lookAt(g_eye, player_pos, vec3(0, 1, 0));
+  	// 	glUniformMatrix4fv(shader->getUniform("V"), 1, GL_FALSE, value_ptr(Cam));
+	// }
 
 	// //used for checking collisions
 	// void check_collision(vec3 f_list[], int len1, vec3 t_list[], int len2, vec3 cat_pos) {
@@ -899,7 +897,7 @@ public:
 		drawGround(tex);  //draw ground here
 
 
-		catEnt.position = player_pos;
+		catEnt.position = cam.player_pos;
 		//halt animations if cat collides with flower or tree
 		cout << catEnt.position.x << ", " << catEnt.position.y << ", " << catEnt.position.z << endl;
 		cout << "before calling check collision, catID = " << catEnt.id << endl;
