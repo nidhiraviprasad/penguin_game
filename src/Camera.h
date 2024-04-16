@@ -14,6 +14,7 @@ class Camera
         glm::vec3 upV;
         glm::vec3 view;
         glm::vec3 player_pos;
+        float player_rot;
         float pitch;
         float dist;
         float angle;

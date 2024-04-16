@@ -84,7 +84,6 @@ public:
 
 	//camera
 	double g_theta;
-	vec3 view = vec3(0, 0, 1);
 	vec3 strafe = vec3(1, 0, 0);
 	vec3 g_eye = vec3(0, 0.5, 5);
 
@@ -92,10 +91,9 @@ public:
 	// float dist = 4;
 	// float angle = 0;
 
-	Camera c = Camera(vec3(0, 0, 1), 17, 4, 0, vec3(0, -1.12, 0));
+	Camera c = Camera(vec3(0, 0, 1), 17, 4, 0, vec3(0, -1.12, 0), 0);
 
 	//player animation
-	float player_rot = 0;
 	float oscillate = 0;
 
 	//rules for cat walking around
@@ -130,19 +128,19 @@ public:
 		}
 		animate = false;
 		if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)&& !back_up){
-			player_rot -= 10 * 0.01745329;
+			c.player_rot -= 10 * 0.01745329;
 			animate = true;
 		}
 		if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT) && !back_up){
-			player_rot += 10 * 0.01745329;
+			c.player_rot += 10 * 0.01745329;
 			animate = true;
 		}
 		if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT) && !back_up && bounds < 19){
-			c.player_pos += vec3(sin(player_rot) * 0.1, 0, cos(player_rot) * 0.1);
+			c.player_pos += vec3(sin(c.player_rot) * 0.1, 0, cos(c.player_rot) * 0.1);
 			animate = true;
 		}
 		if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT) && bounds < 19){
-			c.player_pos -= vec3(sin(player_rot) * 0.1, 0, cos(player_rot) * 0.1);
+			c.player_pos -= vec3(sin(c.player_rot) * 0.1, 0, cos(c.player_rot) * 0.1);
 			animate = true;
 		}
 		if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
@@ -163,7 +161,7 @@ public:
 
 	void scrollCallback(GLFWwindow* window, double deltaX, double deltaY) {
    		cout << "xDel + yDel " << deltaX << " " << deltaY << endl;
-		angle -= 10 * (deltaX / 57.296);
+		c.angle -= 10 * (deltaX / 57.296);
 	}
 
 	void resizeCallback(GLFWwindow *window, int width, int height)
@@ -539,7 +537,7 @@ public:
 		std::vector<Entity> flowers;
 		for (int i = 0; i < 7; i++) {
 			Entity e = Entity();
-      e.initEntity(flower);
+      		e.initEntity(flower);
 			e.setMaterials(0, 0.2, 0.1, 0.1, 0.94, 0.42, 0.64, 0.7, 0.23, 0.60, 100);
 			e.setMaterials(1, 0.1, 0.1, 0.1, 0.94, 0.72, 0.22, 0.23, 0.23, 0.20, 100);
 			e.setMaterials(2, 0.05, 0.15, 0.05, 0.24, 0.92, 0.41, 1, 1, 1, 0);
@@ -614,12 +612,10 @@ public:
 		tex.setTexture(3);
 
 
-
-
 		//hierarchical modeling with cat!!
 		Model->pushMatrix();
-			Model->translate(player_pos + vec3(0, cos(oscillate) * 0.009, 0));
-			Model->rotate(player_rot, vec3(0, 1, 0));
+			Model->translate(c.player_pos + vec3(0, cos(oscillate) * 0.009, 0));
+			Model->rotate(c.player_rot, vec3(0, 1, 0));
 			Model->scale(vec3(0.7, 0.7, 0.7));
 
 			

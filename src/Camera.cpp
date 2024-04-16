@@ -6,20 +6,22 @@
 using namespace std;
 using namespace glm;
 
-Camera::Camera(vec3 v, float p, float d, float a, float pp)
+Camera::Camera(glm::vec3 v, float p, float d, float a, vec3 pp, float pr)
 {   
-    cameraPos = vec3(0.0f, 0.0f, 4.0f);
-    lookAtPt = vec3(0.0f, 0.0f, 0.0f);
-    upV = vec3(0, 1, 0);
-    player_pos = pp;
-    view = v;
-    pitch = p;
-    dist = d;
-    angle = a;
-    horiz;
-    vert;
-    offX;
-    offZ;
+    public: 
+        cameraPos = vec3(0.0f, 0.0f, 4.0f);
+        lookAtPt = vec3(0.0f, 0.0f, 0.0f);
+        upV = vec3(0, 1, 0);
+        player_pos = pp;
+        player_rot = pr;
+        view = v;
+        pitch = p;
+        dist = d;
+        angle = a;
+        horiz;
+        vert;
+        offX;
+        offZ;
 
 }
 
