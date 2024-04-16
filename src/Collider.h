@@ -17,15 +17,16 @@ public:
 
     Collider();
     Collider(std::vector<std::shared_ptr<Shape>> mesh, entityType type);
-    void CheckCollision(std::vector<Entity> entities);
-    void SetEntity(Entity e);
+    void UpdateColliderSize();
+    void CheckCollision(std::vector<Entity> entities, int thisID);
+    void SetEntityID(int ID);
     bool IsColliding();
     void ExitCollision();
     float GetRadial();
 
 private:
 
-    Entity* entity;
+    int entityId;
     float radial;
     bool colliding = false;
 

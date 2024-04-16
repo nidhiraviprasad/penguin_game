@@ -39,13 +39,17 @@ class Entity {
 
         void updateMotion(float deltaTime);
 
+        void updateScale(float newScale);
+
+        static int NEXT_ID; // initializes to 0 and increments with every call to initEntity()
         int id;
         std::vector<std::shared_ptr<Shape>> objs;
         std::vector<materials> material;
         Collider* collider;
         glm::vec3 position;
+        float scale;
         motion m;
-        
+ 
     };
 
 

@@ -31,6 +31,9 @@
 using namespace std;
 using namespace glm;
 
+// static/global vars
+int Entity::NEXT_ID = 0;
+
 class Application : public EventCallbacks
 {
 
@@ -51,9 +54,11 @@ public:
 
 	std::vector<shared_ptr<Shape>> butterfly;
 
+
 	Entity bf1 = Entity();
   Entity bf2 = Entity();
   Entity bf3 = Entity();
+  Entity catEnt = Entity();
   
   std::vector<Entity> bf;
 
@@ -61,8 +66,14 @@ public:
 
 	std::vector<shared_ptr<Shape>> tree1;
 	
-	shared_ptr<Shape> cat;
+	std::vector<shared_ptr<Shape>> cat;
+
+	std::vector<Entity> gameObjects;
 	
+	std::vector<Entity> trees;
+
+	std::vector<Entity> flowers;
+
 
 	int nextID = 0;
 
@@ -130,15 +141,15 @@ public:
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 		animate = false;
-		if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)&& !back_up){
+		if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)&& !catEnt.collider->IsColliding()){
 			player_rot -= 10 * 0.01745329;
 			animate = true;
 		}
-		if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT) && !back_up){
+		if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT) && !catEnt.collider->IsColliding()){
 			player_rot += 10 * 0.01745329;
 			animate = true;
 		}
-		if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT) && !back_up && bounds < 19){
+		if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT) && !catEnt.collider->IsColliding() && bounds < 19){
 			player_pos += vec3(sin(player_rot) * 0.1, 0, cos(player_rot) * 0.1);
 			animate = true;
 		}
@@ -222,10 +233,10 @@ public:
 		if (!rc) {
 			cerr << errStr << endl;
 		} else {	
-			cat = make_shared<Shape>();
-			cat->createShape(TOshapesB[0]);
-			cat->measure();
-			cat->init();
+			cat.push_back(make_shared<Shape>());
+			cat[0]->createShape(TOshapesB[0]);
+			cat[0]->measure();
+			cat[0]->init();
 		}
 
 		vector<tinyobj::shape_t> TOshapes3;
@@ -291,26 +302,92 @@ public:
 		bf1.position = vec3(0.5, 0.2, 0.5);
 		bf1.m.forward = vec3(1, 0, 0);
 		bf1.m.velocity = vec3(2.0, 2.0, 2.0);
-		Collider* bf1Col = new Collider(butterfly, Collider::BUTTERFLY);
+		bf1.collider = new Collider(butterfly, Collider::BUTTERFLY);
+		bf1.collider->SetEntityID(bf1.id);
     
     // init butterfly 2
 		bf2.initEntity(butterfly);
 		bf2.position = vec3(0.5, 0.2, 0.5);
 		bf2.m.forward = vec3(1, 0, 0);
 		bf2.m.velocity = vec3(4.0, 4.0, 4.0);
-    
+		bf2.collider = new Collider(butterfly, Collider::BUTTERFLY);
+		bf2.collider->SetEntityID(bf2.id);
     
     // init butterfly 3
 		bf3.initEntity(butterfly);
 		bf3.position = vec3(4, 0.2, 0.5);
 		bf3.m.forward = vec3(1, 0, 0);
 		bf3.m.velocity = vec3(2.0, 2.0, 2.0);
-    
+		bf3.collider = new Collider(butterfly, Collider::BUTTERFLY);
+		bf3.collider->SetEntityID(bf3.id);
+
+		// init cat entity
+		catEnt.initEntity(cat);
+		catEnt.position = player_pos;
+		cout << catEnt.position.x << ", " << catEnt.position.y << ", " << catEnt.position.z << endl;
+		// set forward
+		// set velocity
+		catEnt.collider = new Collider(cat, Collider::CAT);
+		catEnt.collider->SetEntityID(catEnt.id);
+		gameObjects.push_back(catEnt);
+
+		// vec3 tree_loc[7];
+		// tree_loc[0] = vec3(4, -5.5, 7);
+		// tree_loc[1] = vec3(-2.9,-5.5, -7);
+		// tree_loc[2] = vec3(8, -5.5, -3);
+		// tree_loc[3] = vec3(6, -5.5, -3.7);
+		// tree_loc[4] = vec3(-1, -5.5, 4.9);
+		// tree_loc[5] = vec3(-5, -5.5, 9);
+		// tree_loc[6] = vec3(-6, -5.5, 2);
+
+		// // init tree entities
+		// for (int i = 0; i < 7; i++) {
+		// 	Entity e = Entity();
+      	// 	e.initEntity(tree1);
+		// 	e.position = tree_loc[i] + vec3(0, 4.1, 0);
+		// 	e.setMaterials(0, 0, 0, 0, 0.897093, 0.588047, 0.331905, 0.5, 0.5, 0.5, 200);
+		// 	for (int j = 1; j < 12; j++) {
+		// 		e.setMaterials(j, 0.1, 0.2, 0.1, 0.285989, 0.567238, 0.019148, 0.5, 0.5, 0.5, 200);
+		// 	}
+		// 	e.collider = new Collider(tree1, Collider::TREE);
+		// 	e.collider->SetEntityID(e.id);
+		// 	trees.push_back(e);
+		// 	gameObjects.push_back(e);
+		// }
+
+		// //where each flower will go
+		// vec3 flower_loc[7];
+		// flower_loc[0] = vec3(4, -1, 4);
+		// flower_loc[1] = vec3(-2.3, -1, 3);
+		// flower_loc[2] = vec3(-2, -1.2, -3);
+		// flower_loc[3] = vec3(4, -1, -3.2);
+		// flower_loc[4] = vec3(-5, -1, 2);
+		// flower_loc[5] = vec3(1, -1, -1.7);
+		// flower_loc[6] = vec3(3, -1, -2);
+
+		// // init flower entities
+		// for (int i = 0; i < 7; i++) {
+		// 	Entity e = Entity();
+      	// 	e.initEntity(flower);
+		// 	e.position = flower_loc[i];
+		// 	e.setMaterials(0, 0.2, 0.1, 0.1, 0.94, 0.42, 0.64, 0.7, 0.23, 0.60, 100);
+		// 	e.setMaterials(1, 0.1, 0.1, 0.1, 0.94, 0.72, 0.22, 0.23, 0.23, 0.20, 100);
+		// 	e.setMaterials(2, 0.05, 0.15, 0.05, 0.24, 0.92, 0.41, 1, 1, 1, 0);
+		// 	e.collider = new Collider(flower, Collider::FLOWER);
+		// 	e.collider->SetEntityID(e.id);
+		// 	flowers.push_back(e);
+		// 	gameObjects.push_back(e);
+		// }
     
     bf.push_back(bf1);
     bf.push_back(bf2);
     bf.push_back(bf3);
-    
+	gameObjects.push_back(bf1);
+	gameObjects.push_back(bf2);
+	gameObjects.push_back(bf3);
+
+    cout << "gameObjects size = " << gameObjects.size() << endl;
+
 		//code to load in the ground plane (CPU defined data passed to GPU)
 		initGround();
 	}
@@ -427,34 +504,34 @@ public:
   		glUniformMatrix4fv(shader->getUniform("V"), 1, GL_FALSE, value_ptr(Cam));
 	}
 
-	//used for checking collisions
-	void check_collision(vec3 f_list[], int len1, vec3 t_list[], int len2, vec3 cat_pos) {
-		//first check all flowers
-		back_up = false;
-		for (int i = 0; i < len1; i++) {
-			float distance = std::sqrt(
-				(f_list[i][0] - player_pos[0]) * (f_list[i][0] - player_pos[0])
-				+ (f_list[i][2] - player_pos[2]) * (f_list[i][2] - player_pos[2])
-			);
-			distance = std::abs(distance);
-			if (distance < flower_radial + 0.4) {
-				back_up = true;
-				return;
-			}
-		}
-		//then check all trees
-		for (int i = 0; i < len2; i++) {
-			float distance = std::sqrt(
-				(t_list[i][0] - player_pos[0]) * (t_list[i][0] - player_pos[0])
-				+ (t_list[i][2] - player_pos[2]) * (t_list[i][2] - player_pos[2])
-			);
-			distance = std::abs(distance);
-			if (distance < 0.9) {
-				back_up = true;
-				return;
-			}
-		}
-	}
+	// //used for checking collisions
+	// void check_collision(vec3 f_list[], int len1, vec3 t_list[], int len2, vec3 cat_pos) {
+	// 	//first check all flowers
+	// 	back_up = false;
+	// 	for (int i = 0; i < len1; i++) {
+	// 		float distance = std::sqrt(
+	// 			(f_list[i][0] - player_pos[0]) * (f_list[i][0] - player_pos[0])
+	// 			+ (f_list[i][2] - player_pos[2]) * (f_list[i][2] - player_pos[2])
+	// 		);
+	// 		distance = std::abs(distance);
+	// 		if (distance < flower_radial + 0.4) {
+	// 			back_up = true;
+	// 			return;
+	// 		}
+	// 	}
+	// 	//then check all trees
+	// 	for (int i = 0; i < len2; i++) {
+	// 		float distance = std::sqrt(
+	// 			(t_list[i][0] - player_pos[0]) * (t_list[i][0] - player_pos[0])
+	// 			+ (t_list[i][2] - player_pos[2]) * (t_list[i][2] - player_pos[2])
+	// 		);
+	// 		distance = std::abs(distance);
+	// 		if (distance < 0.9) {
+	// 			back_up = true;
+	// 			return;
+	// 		}
+	// 	}
+	// }
 
 
 	void render(float frametime) {
@@ -527,67 +604,24 @@ public:
 			bf[2].objs[i]->draw(reg.prog);
 		}
 
-		//where each flower will go
-		vec3 flower_loc[7];
-		flower_loc[0] = vec3(4, -1, 4);
-		flower_loc[1] = vec3(-2.3, -1, 3);
-		flower_loc[2] = vec3(-2, -1.2, -3);
-		flower_loc[3] = vec3(4, -1, -3.2);
-		flower_loc[4] = vec3(-5, -1, 2);
-		flower_loc[5] = vec3(1, -1, -1.7);
-		flower_loc[6] = vec3(3, -1, -2);
-
-
-
-		std::vector<Entity> flowers;
-		for (int i = 0; i < 7; i++) {
-			Entity e = Entity();
-      		e.initEntity(flower);
-			e.setMaterials(0, 0.2, 0.1, 0.1, 0.94, 0.42, 0.64, 0.7, 0.23, 0.60, 100);
-			e.setMaterials(1, 0.1, 0.1, 0.1, 0.94, 0.72, 0.22, 0.23, 0.23, 0.20, 100);
-			e.setMaterials(2, 0.05, 0.15, 0.05, 0.24, 0.92, 0.41, 1, 1, 1, 0);
-			flowers.push_back(e);
-		}
 
 		//reg.setModel(vec3(4, -1, 4), cTheta*cTheta, 0, 0, 2.5);
-		for (int i = 0; i < 7; i++) {
+		// for (int i = 0; i < 7; i++) {
 					
-			reg.setModel(flower_loc[i], cTheta*cTheta+0.03, 0, 0, 2.5); 
-			for (int j = 0; j < 3; j++) {
-				reg.setMaterial(flowers[i].material[j]);
-				flowers[i].objs[j]->draw(reg.prog);
-			}
-		}
+		// 	reg.setModel(flowers[i].position, cTheta*cTheta+0.03, 0, 0, 2.5); 
+		// 	for (int j = 0; j < 3; j++) {
+		// 		reg.setMaterial(flowers[i].material[j]);
+		// 		flowers[i].objs[j]->draw(reg.prog);
+		// 	}
+		// }
 
-
-		vec3 tree_loc[7];
-		tree_loc[0] = vec3(4, -5.5, 7);
-		tree_loc[1] = vec3(-2.9,-5.5, -7);
-		tree_loc[2] = vec3(8, -5.5, -3);
-		tree_loc[3] = vec3(6, -5.5, -3.7);
-		tree_loc[4] = vec3(-1, -5.5, 4.9);
-		tree_loc[5] = vec3(-5, -5.5, 9);
-		tree_loc[6] = vec3(-6, -5.5, 2);
-
-		std::vector<Entity> trees;
-		for (int i = 0; i < 7; i++) {
-			Entity e = Entity();
-      		e.initEntity(tree1);
-			e.setMaterials(0, 0, 0, 0, 0.897093, 0.588047, 0.331905, 0.5, 0.5, 0.5, 200);
-			for (int j = 1; j < 12; j++) {
-				e.setMaterials(j, 0.1, 0.2, 0.1, 0.285989, 0.567238, 0.019148, 0.5, 0.5, 0.5, 200);
-			}
-			trees.push_back(e);
-		}
-
-		for (int i = 0; i < 7; i++) {
-			reg.setModel(tree_loc[i] + vec3(0, 4.1, 0), 0, 0, 0, 0.15); 
-			for (int j = 0; j < 12; j++) {
-				reg.setMaterial(trees[i].material[j]);
-				trees[i].objs[j]->draw(reg.prog);
-			}
-		}
-
+		// for (int i = 0; i < 7; i++) {
+		// 	reg.setModel(trees[i].position, 0, 0, 0, 0.15); 
+		// 	for (int j = 0; j < 12; j++) {
+		// 		reg.setMaterial(trees[i].material[j]);
+		// 		trees[i].objs[j]->draw(reg.prog);
+		// 	}
+		// }
 
 
 		reg.prog->unbind();
@@ -805,7 +839,7 @@ public:
 
 			Model->scale(vec3(0.4, 0.4, 0.4));
 			tex.setModel(Model);
-			cat->draw(tex.prog); // body !
+			cat[0]->draw(tex.prog); // body !
 
 
 		Model->popMatrix();
@@ -845,9 +879,11 @@ public:
 
 
 		//halt animations if cat collides with flower or tree
+		cout << catEnt.position.x << ", " << catEnt.position.y << ", " << catEnt.position.z << endl;
+		catEnt.collider->CheckCollision(gameObjects, catEnt.id);
+		cout << "cat collision = " << catEnt.collider->IsColliding() <<  endl;
 	//	check_collision(flower_loc, 7, tree_loc, 7, player_pos);
 		
-
 		//update animation variables
 		sTheta = -1*abs(sin(glfwGetTime() * 2));
 		cTheta = cos(glfwGetTime()) / 4;
