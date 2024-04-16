@@ -516,46 +516,6 @@ public:
      }
 
 
-	// void SetView(shared_ptr<Program> shader) {
-	// 	float horiz = dist * cos(pitch * 0.01745329);   // for third person camera - calculate horizontal and
-	// 	float vert = dist * sin(pitch * 0.01745329);    // vertical offset based on maintained distance
-	// 	float offX = horiz * sin(angle);				// rotation around cat
-	// 	float offZ = horiz * cos(angle);
-
-	// 	g_eye = vec3(player_pos[0] - offX, player_pos[1] + vert, player_pos[2] - offZ);
-  	// 	glm::mat4 Cam = glm::lookAt(g_eye, player_pos, vec3(0, 1, 0));
-  	// 	glUniformMatrix4fv(shader->getUniform("V"), 1, GL_FALSE, value_ptr(Cam));
-	// }
-
-	// //used for checking collisions
-	// void check_collision(vec3 f_list[], int len1, vec3 t_list[], int len2, vec3 cat_pos) {
-	// 	//first check all flowers
-	// 	back_up = false;
-	// 	for (int i = 0; i < len1; i++) {
-	// 		float distance = std::sqrt(
-	// 			(f_list[i][0] - player_pos[0]) * (f_list[i][0] - player_pos[0])
-	// 			+ (f_list[i][2] - player_pos[2]) * (f_list[i][2] - player_pos[2])
-	// 		);
-	// 		distance = std::abs(distance);
-	// 		if (distance < flower_radial + 0.4) {
-	// 			back_up = true;
-	// 			return;
-	// 		}
-	// 	}
-	// 	//then check all trees
-	// 	for (int i = 0; i < len2; i++) {
-	// 		float distance = std::sqrt(
-	// 			(t_list[i][0] - player_pos[0]) * (t_list[i][0] - player_pos[0])
-	// 			+ (t_list[i][2] - player_pos[2]) * (t_list[i][2] - player_pos[2])
-	// 		);
-	// 		distance = std::abs(distance);
-	// 		if (distance < 0.9) {
-	// 			back_up = true;
-	// 			return;
-	// 		}
-	// 	}
-	// }
-
 
 	void render(float frametime) {
 		// Get current frame buffer size.

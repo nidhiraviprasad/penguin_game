@@ -89,9 +89,6 @@ int Collider::CatCollision(std::vector<Entity> entities, Entity *cat)
             (entities[i].position.z - cat->position.z) * (entities[i].position.z - cat->position.z)
             );
             distance = std::abs(distance);
-            cout << "distance is " << distance << endl;
-            cout << "radial of other is " << entities[i].collider->GetRadial() << " compared to this radial which is " << cat->collider->GetRadial() << endl;
-            
             if(distance < entities[i].collider->GetRadial() + cat->collider->GetRadial()){
                 // update this to account for butterfly collection
                 colliding = true;
