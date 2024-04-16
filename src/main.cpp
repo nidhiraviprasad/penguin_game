@@ -51,10 +51,10 @@ public:
 	std::vector<shared_ptr<Shape>> butterfly;
 
 	Entity bf1 = Entity();
-  Entity bf2 = Entity();
-  Entity bf3 = Entity();
-  
-  std::vector<Entity> bf;
+	Entity bf2 = Entity();
+	Entity bf3 = Entity();
+	
+	std::vector<Entity> bf;
 
 	std::vector<shared_ptr<Shape>> flower;
 
@@ -286,26 +286,26 @@ public:
 		// init butterfly 1
 		bf1.initEntity(butterfly);
 		bf1.position = vec3(0.5, 0.2, 0.5);
-		bf1.m.forward = vec3(1, 0, 0);
-		bf1.m.velocity = vec3(2.0, 2.0, 2.0);
+		// bf1.m.forward = vec3(1, 0, 0);
+		bf1.m.velocity = vec3(2.0, 0, 0);
     
-    // init butterfly 2
+    	// init butterfly 2
 		bf2.initEntity(butterfly);
 		bf2.position = vec3(0.5, 0.2, 0.5);
-		bf2.m.forward = vec3(1, 0, 0);
-		bf2.m.velocity = vec3(4.0, 4.0, 4.0);
+		// bf2.m.forward = vec3(1, 0, 0);
+		bf2.m.velocity = vec3(-2.0, 0.0, 1.0);
     
     
-    // init butterfly 3
+   		 // init butterfly 3
 		bf3.initEntity(butterfly);
 		bf3.position = vec3(4, 0.2, 0.5);
-		bf3.m.forward = vec3(1, 0, 0);
-		bf3.m.velocity = vec3(2.0, 2.0, 2.0);
+		// bf3.m.forward = vec3(1, 0, 0);
+		bf3.m.velocity = vec3(1.3, 0, 0);
     
-    
-    bf.push_back(bf1);
-    bf.push_back(bf2);
-    bf.push_back(bf3);
+		
+		bf.push_back(bf1);
+		bf.push_back(bf2);
+		bf.push_back(bf3);
     
 		//code to load in the ground plane (CPU defined data passed to GPU)
 		initGround();
