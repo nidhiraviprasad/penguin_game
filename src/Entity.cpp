@@ -48,6 +48,11 @@ void Entity::updateScale(float newScale){
 void Entity::updateMotion(float deltaTime) {
         // Calculate dot product between forward vector and velocity
         float dotProduct = glm::dot(glm::normalize(m.forward), m.velocity);
+
+        float distance = sqrt((position.x * position.x) + (position.y * position.y) + (position.z * position.z));
+        if(distance >= 19.5){
+            m.velocity *= -1;
+        }
         
         // Update position based on dot product and velocity
         // position += dotProduct * m.forward * deltaTime;

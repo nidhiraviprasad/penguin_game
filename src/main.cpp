@@ -303,7 +303,7 @@ public:
 		bf1.initEntity(butterfly);
 		bf1.position = vec3(2, -0.3, -1);
 		bf1.m.forward = vec3(1, 0, 0);
-		bf1.m.velocity = vec3(.20, 0, .20);
+		bf1.m.velocity = vec3(2, 0, 2);
 		bf1.collider = new Collider(butterfly, Collider::BUTTERFLY);
 		bf1.collider->SetEntityID(bf1.id);
 		cout << "butterfly 1 " << bf1.id << endl;
@@ -938,6 +938,11 @@ public:
 		for (int i = 0; i < 3; i ++){
 			if (bf_flags[i] == 1) {
 				bf[i].scale *= 0.95f;
+				if (bf[i].scale < 0.00001) {
+					bf[i].scale = 0.01;
+					bf_flags[i] = 0;
+					bf[i].position = vec3(0, -0.3, 0);
+				}
 			}
 			bf[i].updateMotion(frametime);
 		}
