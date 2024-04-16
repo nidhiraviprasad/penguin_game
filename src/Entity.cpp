@@ -44,7 +44,8 @@ void Entity::updateMotion(float deltaTime) {
         float dotProduct = glm::dot(glm::normalize(m.forward), m.velocity);
         
         // Update position based on dot product and velocity
-        position += dotProduct * m.forward * deltaTime;
+        // position += dotProduct * m.forward * deltaTime;
+        position += m.velocity * deltaTime;
     
         std::cout << "deltaTime: " << deltaTime << "entity position:" << position.x << ", " << position.y << ", " << position.z << std::endl;
         
