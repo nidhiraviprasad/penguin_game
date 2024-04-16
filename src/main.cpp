@@ -62,7 +62,6 @@ public:
 	std::vector<shared_ptr<Shape>> tree1;
 	
 	shared_ptr<Shape> cat;
-	
 
 	//global data for ground plane - direct load constant defined CPU data to GPU (not obj)
 	GLuint GrndBuffObj, GrndNorBuffObj, GrndTexBuffObj, GIndxBuffObj;
@@ -86,7 +85,7 @@ public:
 	double g_theta;
 	vec3 strafe = vec3(1, 0, 0);
 
-	// 					view 		pitch dist angle playerpos playerrot animate g_eye
+	// 	view pitch dist angle playerpos playerrot animate g_eye
 	Camera cam = Camera(vec3(0, 0, 1), 17, 4, 0, vec3(0, -1.12, 0), 0, vec3(0, 0.5, 5));
 
 	//player animation
@@ -94,7 +93,6 @@ public:
 	float oscillate = 0;
 
 	//rules for cat walking around
-
 	bool back_up = false;
 	
 	//keyframes for cat walking animation
