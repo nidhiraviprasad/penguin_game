@@ -65,7 +65,7 @@ void Collider::CheckCollision(std::vector<Entity> entities, int thisID)
     }
 }
 
-void Collider::CatCollision(std::vector<Entity> entities, Entity *cat)
+int Collider::CatCollision(std::vector<Entity> entities, Entity *cat)
 {
     for(int i = 0; i < entities.size(); i++){
         cout << "this id = " << cat->id << " and checking id " << entities[i].id << endl;
@@ -95,13 +95,14 @@ void Collider::CatCollision(std::vector<Entity> entities, Entity *cat)
             if(distance < entities[i].collider->GetRadial() + cat->collider->GetRadial()){
                 // update this to account for butterfly collection
                 colliding = true;
-                return;
+                return i;
             }
             else {
                 colliding = false;
             }
         //} 
     }
+    return -1;
 }
 
 void Collider::UpdateColliderSize(){
