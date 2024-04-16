@@ -299,7 +299,7 @@ public:
 
 		// init butterfly 1
 		bf1.initEntity(butterfly);
-		bf1.position = vec3(0.5, 0.2, 0.5);
+		bf1.position = vec3(0.5, -1.2, 0.5);
 		bf1.m.forward = vec3(1, 0, 0);
 		bf1.m.velocity = vec3(2.0, 2.0, 2.0);
 		bf1.collider = new Collider(butterfly, Collider::BUTTERFLY);
@@ -309,7 +309,7 @@ public:
     
     // init butterfly 2
 		bf2.initEntity(butterfly);
-		bf2.position = vec3(0.5, 0.2, 0.5);
+		bf2.position = vec3(0.5, -1.2, 0.5);
 		bf2.m.forward = vec3(1, 0, 0);
 		bf2.m.velocity = vec3(4.0, 4.0, 4.0);
 		bf2.collider = new Collider(butterfly, Collider::BUTTERFLY);
@@ -320,7 +320,7 @@ public:
     
     // init butterfly 3
 		bf3.initEntity(butterfly);
-		bf3.position = vec3(4, 0.2, 0.5);
+		bf3.position = vec3(4, -1.2, 0.5);
 		bf3.m.forward = vec3(1, 0, 0);
 		bf3.m.velocity = vec3(2.0, 2.0, 2.0);
 		bf3.collider = new Collider(butterfly, Collider::BUTTERFLY);
@@ -397,6 +397,10 @@ public:
 	gameObjects.push_back(bf2);
 	gameObjects.push_back(bf3);
 
+	cout << "butterfly entities size = " << bf.size() << endl;
+	for(int i = 0; i < bf.size(); i++){
+		cout << "bf[" << i << "] id is " << bf[i].id << endl;
+	}
     cout << "gameObjects size = " << gameObjects.size() << endl;
 
 		//code to load in the ground plane (CPU defined data passed to GPU)
@@ -889,9 +893,11 @@ public:
 		drawGround(tex);  //draw ground here
 
 
+		catEnt.position = player_pos;
 		//halt animations if cat collides with flower or tree
 		cout << catEnt.position.x << ", " << catEnt.position.y << ", " << catEnt.position.z << endl;
-		catEnt.collider->CheckCollision(gameObjects, catEnt.id);
+		cout << "before calling check collision, catID = " << catEnt.id << endl;
+		catEnt.collider->CatCollision(bf, &catEnt);
 		cout << "cat collision = " << catEnt.collider->IsColliding() <<  endl;
 	//	check_collision(flower_loc, 7, tree_loc, 7, player_pos);
 		
@@ -918,7 +924,7 @@ public:
 		Projection->popMatrix();
 
 		for (int i = 0; i < 3; i ++){
-			bf[i].updateMotion(frametime);
+			//bf[i].updateMotion(frametime);
 		}
 
 

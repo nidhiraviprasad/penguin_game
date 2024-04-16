@@ -21,6 +21,7 @@ public:
     Collider(std::vector<std::shared_ptr<Shape>> mesh, entityType type);
     void UpdateColliderSize();
     void CheckCollision(std::vector<Entity> entities, int thisID);
+    void CatCollision(std::vector<Entity> entities, Entity *cat);
     void SetEntityID(int ID);
     bool IsColliding();
     void ExitCollision();
