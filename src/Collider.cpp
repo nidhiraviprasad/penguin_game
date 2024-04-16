@@ -29,28 +29,37 @@ Collider::Collider(std::vector<std::shared_ptr<Shape>> mesh, entityType type)
 void Collider::CheckCollision(std::vector<Entity> entities, int thisID)
 {
     for(int i = 0; i < entities.size(); i++){
-        cout << "this id = " << thisID << " and checking id " << entities[i].id << endl;
-        cout << "this id = " << thisID << " and checking entities pos " << i << endl;
-        if(entities[i].id != thisID) // exclude self when checking collisions
+        cout << "this id = " << this->entityId << " and checking id " << entities[i].id << endl;
+        /*cout << "this id = " << thisID << " and checking entities pos " << i << endl;*/
+        if(entities[i].id != this->entityId) // exclude self when checking collisions
         {
-            cout << "id = " << entities[i].id << endl;
-            cout << "entity pos x = " << entities[i].position.x << endl;
+            cout << entities[i].collider->entityName << endl;
+            
+            cout << "my type " << this->entityName << endl;
+            cout << "here" << endl;
+            /*cout << "this id = " << thisID << " and checking id " << entities[i].id << endl;
+            cout << "this id = " << thisID << " and checking entities pos " << i << endl; */
+           /* cout << "entity pos x = " << entities[i].position.x << endl;
             cout << "player pos x = " << entities[thisID].position.x << endl;
             cout << "entity pos z = " << entities[i].position.z << endl;
             cout << "player pos z = " << entities[thisID].position.z << endl;
-
+            */
 
             float distance = std::sqrt(
-            (entities[i].position.x - entities[thisID].position.x) * (entities[i].position.x - entities[thisID].position.x) + 
-            (entities[i].position.z - entities[thisID].position.z) * (entities[i].position.z - entities[thisID].position.z)
+            (entities[i].position.x - entities[this->entityId].position.x) * (entities[i].position.x - entities[this->entityId].position.x) + 
+            (entities[i].position.z - entities[this->entityId].position.z) * (entities[i].position.z - entities[this->entityId].position.z)
             );
             distance = std::abs(distance);
-            cout << "distance is " << distance << endl;
+            /*cout << "distance is " << distance << endl;
             cout << "radial of other is " << entities[i].collider->GetRadial() << "compared to this radial which is " << entities[thisID].collider->GetRadial() << endl;
-            if(distance < entities[i].collider->GetRadial() + entities[thisID].collider->GetRadial()){
+            */
+            if(distance < entities[i].collider->GetRadial() + entities[this->entityId].collider->GetRadial()){
                 // update this to account for butterfly collection
                 colliding = true;
                 return;
+            }
+            else {
+                colliding = false;
             }
         } 
     }

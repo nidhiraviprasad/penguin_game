@@ -304,6 +304,8 @@ public:
 		bf1.m.velocity = vec3(2.0, 2.0, 2.0);
 		bf1.collider = new Collider(butterfly, Collider::BUTTERFLY);
 		bf1.collider->SetEntityID(bf1.id);
+		cout << "butterfly 1 " << bf1.id << endl;
+		bf1.collider->entityName = 'b';
     
     // init butterfly 2
 		bf2.initEntity(butterfly);
@@ -312,6 +314,9 @@ public:
 		bf2.m.velocity = vec3(4.0, 4.0, 4.0);
 		bf2.collider = new Collider(butterfly, Collider::BUTTERFLY);
 		bf2.collider->SetEntityID(bf2.id);
+		cout << "butterfly 2 " << bf2.id << endl;
+		bf2.collider->entityName = 'b';
+
     
     // init butterfly 3
 		bf3.initEntity(butterfly);
@@ -320,6 +325,9 @@ public:
 		bf3.m.velocity = vec3(2.0, 2.0, 2.0);
 		bf3.collider = new Collider(butterfly, Collider::BUTTERFLY);
 		bf3.collider->SetEntityID(bf3.id);
+		cout << "butterfly 3 " << bf3.id << endl;
+		bf3.collider->entityName = 'b';
+
 
 		// init cat entity
 		catEnt.initEntity(cat);
@@ -330,6 +338,9 @@ public:
 		catEnt.collider = new Collider(cat, Collider::CAT);
 		catEnt.collider->SetEntityID(catEnt.id);
 		gameObjects.push_back(catEnt);
+		
+		cout << "cat " << catEnt.id << endl;
+		catEnt.collider->entityName = 'c';
 
 		// vec3 tree_loc[7];
 		// tree_loc[0] = vec3(4, -5.5, 7);

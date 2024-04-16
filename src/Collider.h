@@ -14,6 +14,8 @@ public:
         BUTTERFLY,
         CAT
     };
+    
+    char entityName;
 
     Collider();
     Collider(std::vector<std::shared_ptr<Shape>> mesh, entityType type);
