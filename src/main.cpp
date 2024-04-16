@@ -110,7 +110,7 @@ public:
 
 	//bounds for world
 	double bounds;
-		
+	
 	//interpolation of keyframes for animation
 	int cur_idx = 0, next_idx = 1;
 	float frame = 0.0;
